@@ -575,8 +575,8 @@ const AdvanceApplicationForm: React.FC<{ lang: string; employeeId?: string; onCl
 };
 
 // Sub-components
-const StatCard: React.FC<{ label: string; value: string; color: string }> = ({ label, value, color }) => (
-  <div className="bg-card rounded-xl border border-border card-shadow p-3 text-center">
+const StatCard: React.FC<{ label: string; value: string; color: string; bg?: string }> = ({ label, value, color, bg }) => (
+  <div className={`rounded-2xl border border-border card-shadow p-3 text-center ${bg || 'bg-card'}`}>
     <div className={`font-display text-xl font-bold ${color}`}>{value}</div>
     <div className="text-[10px] text-muted-foreground mt-1">{label}</div>
   </div>
