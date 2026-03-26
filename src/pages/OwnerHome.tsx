@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { Users, AlertTriangle, Award, IndianRupee, Heart, ChevronRight, TrendingUp, Factory, Zap } from 'lucide-react';
+import MoreMenu from '@/components/MoreMenu';
 import { useAllEmployees, useTodayAttendanceAll, useAllScores } from '@/hooks/useEmployeeData';
 
 const OwnerHome: React.FC = () => {
