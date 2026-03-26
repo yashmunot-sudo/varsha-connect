@@ -6,6 +6,7 @@ import SupervisorHome from './SupervisorHome';
 import ManagerHome from './ManagerHome';
 import HRAdminHome from './HRAdminHome';
 import OwnerHome from './OwnerHome';
+import vflLogo from '@/assets/vfl-logo.jpeg';
 
 const Index: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -14,8 +15,15 @@ const Index: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="font-display text-2xl font-extrabold text-gradient-fire mb-2">VFL</div>
-          <div className="font-mono text-[10px] text-muted-foreground tracking-[0.3em] uppercase">Loading...</div>
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg border border-border mx-auto mb-4">
+            <img src={vflLogo} alt="VFL" className="w-full h-full object-contain" />
+          </div>
+          <div className="text-sm font-bold text-foreground mb-1">Varsha Forgings</div>
+          <div className="flex items-center gap-1.5 justify-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0.2s' }} />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0.4s' }} />
+          </div>
         </div>
       </div>
     );

@@ -7,6 +7,7 @@ interface BottomNavProps {
   role: UserRole;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  badges?: Record<string, number>;
 }
 
 const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; label_hi: string; label_en: string }[]> = {
@@ -46,30 +47,39 @@ const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; labe
   ],
 };
 
-const BottomNav: React.FC<BottomNavProps> = ({ role, activeTab, onTabChange }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ role, activeTab, onTabChange, badges = {} }) => {
   const { lang } = useLanguage();
   const items = roleNavItems[role] || roleNavItems.worker;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card safe-bottom">
-      <div className="flex items-center justify-around px-2 py-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-card/98 backdrop-blur-md safe-bottom">
+      <div className="flex items-center justify-around px-1 py-1">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
+          const badge = badges[item.id];
           return (
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors touch-target ${
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all touch-target ${
                 isActive
                   ? 'text-primary'
-                  : 'text-muted-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
-              <span className="text-[10px] font-medium leading-tight">
+              <div className="relative">
+                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
+                {badge && badge > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-destructive text-destructive-foreground text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {badge > 9 ? '9+' : badge}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[10px] leading-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
                 {lang === 'hi' ? item.label_hi : item.label_en}
               </span>
+              {isActive && <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
             </button>
           );
         })}

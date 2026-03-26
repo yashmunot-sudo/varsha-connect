@@ -14,30 +14,34 @@ const TopBar: React.FC = () => {
   const roleInfo = USER_ROLES[user.role];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-card/95 backdrop-blur-md">
+      <div className="flex items-center justify-between px-4 py-2.5">
         <div className="flex items-center gap-3">
-          <img src={vflLogo} alt="Varsha Forgings" className="w-8 h-8 rounded-md object-contain" />
+          <div className="w-9 h-9 rounded-lg overflow-hidden border border-border/60 shadow-sm bg-card">
+            <img src={vflLogo} alt="Varsha Forgings" className="w-full h-full object-contain" />
+          </div>
           <div>
-            <div className="font-display text-sm font-bold leading-tight text-muted-foreground">
+            <div className="text-sm font-bold leading-tight text-muted-foreground">
               Varsha Forgings
             </div>
-            <div className="text-[10px] text-muted-foreground tracking-wider uppercase">
-              {user.empCode} · {lang === 'hi' ? roleInfo.label_hi : roleInfo.label_en}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono text-primary font-semibold">{user.empCode}</span>
+              <span className="text-[10px] text-muted-foreground">·</span>
+              <span className="text-[10px] text-muted-foreground">{lang === 'hi' ? roleInfo.label_hi : roleInfo.label_en}</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')}
-            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-muted-foreground border border-border hover:bg-muted transition-colors"
+            className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] text-muted-foreground border border-border/60 hover:bg-muted transition-colors font-medium"
           >
-            <Globe className="w-3.5 h-3.5" />
+            <Globe className="w-3 h-3" />
             {lang === 'hi' ? 'EN' : 'हि'}
           </button>
           <button
             onClick={logout}
-            className="rounded-md p-1.5 text-muted-foreground hover:text-destructive hover:bg-muted transition-colors"
+            className="rounded-full p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
           >
             <LogOut className="w-4 h-4" />
           </button>
