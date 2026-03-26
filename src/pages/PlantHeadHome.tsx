@@ -64,6 +64,36 @@ const PlantHeadHome: React.FC = () => {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? (lang === 'hi' ? 'सुप्रभात' : 'Good Morning') : hour < 17 ? (lang === 'hi' ? 'नमस्कार' : 'Good Afternoon') : (lang === 'hi' ? 'शुभ संध्या' : 'Good Evening');
 
+  if (activeTab === 'mrm') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <MRMReviewTab />
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'email') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <EmailTasksTab />
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'purchase') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <PurchaseRequisitionTab />
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
   if (activeTab === 'more') {
     return <MoreMenu role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
   }

@@ -224,6 +224,20 @@ const OwnerHome: React.FC = () => {
             <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'ध्यान देने की ज़रूरत' : 'Needs Attention'}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
+          <button onClick={() => setActiveTab('mrm')} className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-shadow hover:bg-muted/50 transition-all active:scale-[0.98]">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+              <ClipboardList className="w-5 h-5 text-success" />
+            </div>
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'समीक्षा / MRM' : 'MRM Review'}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button onClick={() => setActiveTab('email')} className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-shadow hover:bg-muted/50 transition-all active:scale-[0.98]">
+            <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
+              <Mail className="w-5 h-5 text-info" />
+            </div>
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'ईमेल कार्य' : 'Email Tasks'}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
       </div>
       <BottomNav role="owner" activeTab={activeTab} onTabChange={setActiveTab} />
