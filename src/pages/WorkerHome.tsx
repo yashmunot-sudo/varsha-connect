@@ -129,9 +129,9 @@ const WorkerHome: React.FC = () => {
           </h2>
           <AttendanceCalendar lang={lang} records={attendanceRecords || []} />
           <div className="grid grid-cols-3 gap-2">
-            <StatCard label={lang === 'hi' ? 'उपस्थित' : 'Present'} value={String(presentCount)} color="text-success" />
-            <StatCard label={lang === 'hi' ? 'अनुपस्थित' : 'Absent'} value={String(absentCount)} color="text-danger" />
-            <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value={String(lateCount)} color="text-warning" />
+            <StatCard label={lang === 'hi' ? 'उपस्थित' : 'Present'} value={String(presentCount)} color="text-success" bg="bg-success/10" />
+            <StatCard label={lang === 'hi' ? 'अनुपस्थित' : 'Absent'} value={String(absentCount)} color="text-danger" bg="bg-danger/10" />
+            <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value={String(lateCount)} color="text-warning" bg="bg-warning/10" />
           </div>
         </div>
         <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
@@ -145,7 +145,7 @@ const WorkerHome: React.FC = () => {
         <TopBar />
         <div className="px-4 py-4 space-y-4">
           <h2 className="font-display text-lg font-bold text-foreground">{lang === 'hi' ? 'मेरा स्कोर' : 'My Score'}</h2>
-          <div className="bg-card rounded-xl border border-border card-shadow p-6 text-center">
+          <div className="bg-gradient-to-br from-primary/10 to-warning/5 rounded-2xl border border-primary/15 p-6 text-center">
             <div className="font-display text-5xl font-extrabold text-primary mb-2">{compositeScore}</div>
             <div className="text-xs text-muted-foreground tracking-wider uppercase">
               {lang === 'hi' ? 'इस महीने का स्कोर' : 'This Month Score'}
@@ -156,8 +156,10 @@ const WorkerHome: React.FC = () => {
             <ScoreRow label={lang === 'hi' ? 'प्रदर्शन (40%)' : 'Performance (40%)'} value={Math.round(Number(score?.performance_score || 0))} max={100} color="bg-info" />
             <ScoreRow label={lang === 'hi' ? 'अवलोकन (20%)' : 'Observations (20%)'} value={Math.round(Number(score?.observation_score || 0))} max={100} color="bg-primary" />
           </div>
-          <div className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center gap-3">
-            <Award className="w-8 h-8 text-warning" />
+          <div className="bg-gradient-to-r from-warning/10 to-warning/5 rounded-2xl border border-warning/20 p-4 flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-warning/15 flex items-center justify-center">
+              <Award className="w-6 h-6 text-warning" />
+            </div>
             <div>
               <div className="font-display text-sm font-bold text-foreground">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}: #{eotmRank}</div>
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'टॉप 5 में हैं! बढ़िया!' : 'Keep going!'}</div>
@@ -248,11 +250,18 @@ const WorkerHome: React.FC = () => {
     <div className="min-h-screen bg-background pb-20">
       <TopBar />
       <div className="px-4 py-4 space-y-4">
+        {/* Greeting */}
+        <div>
+          <div className="text-xs text-primary font-semibold tracking-[0.15em] uppercase mb-1">
+            {(() => { const h = new Date().getHours(); return h < 12 ? (lang === 'hi' ? 'सुप्रभात' : 'Good Morning') : h < 17 ? (lang === 'hi' ? 'नमस्ते' : 'Good Afternoon') : (lang === 'hi' ? 'शुभ संध्या' : 'Good Evening'); })()}, {user?.nameHi || user?.name?.split(' ')[0]}
+          </div>
+        </div>
+
         {/* Today's shift info */}
-        <div className="bg-card rounded-xl border border-border card-shadow p-4">
+        <div className="bg-gradient-to-r from-primary/8 to-info/5 rounded-2xl border border-primary/15 p-4">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-primary" />
-            <span className="text-[10px] text-primary tracking-[0.2em] uppercase font-semibold">
+            <span className="text-[10px] text-primary tracking-[0.15em] uppercase font-semibold">
               {lang === 'hi' ? 'आज की शिफ्ट' : "TODAY'S SHIFT"}
             </span>
           </div>
@@ -273,7 +282,7 @@ const WorkerHome: React.FC = () => {
           <button
             onClick={handleCheckIn}
             disabled={checkingIn}
-            className="w-full py-8 rounded-xl bg-primary text-primary-foreground font-display font-extrabold text-xl transition-all touch-target-xl glow-primary active:scale-95 disabled:opacity-70"
+            className="w-full py-8 rounded-2xl bg-primary text-primary-foreground font-display font-extrabold text-xl transition-all touch-target-xl shadow-lg shadow-primary/25 active:scale-[0.97] disabled:opacity-70"
           >
             {checkingIn ? (
               <span className="flex items-center justify-center gap-3">
@@ -566,21 +575,21 @@ const AdvanceApplicationForm: React.FC<{ lang: string; employeeId?: string; onCl
 };
 
 // Sub-components
-const StatCard: React.FC<{ label: string; value: string; color: string }> = ({ label, value, color }) => (
-  <div className="bg-card rounded-xl border border-border card-shadow p-3 text-center">
+const StatCard: React.FC<{ label: string; value: string; color: string; bg?: string }> = ({ label, value, color, bg }) => (
+  <div className={`rounded-2xl border border-border card-shadow p-3 text-center ${bg || 'bg-card'}`}>
     <div className={`font-display text-xl font-bold ${color}`}>{value}</div>
     <div className="text-[10px] text-muted-foreground mt-1">{label}</div>
   </div>
 );
 
 const ScoreRow: React.FC<{ label: string; value: number; max: number; color: string }> = ({ label, value, max, color }) => (
-  <div className="bg-card rounded-xl border border-border card-shadow p-4">
+  <div className="bg-card rounded-2xl border border-border card-shadow p-4">
     <div className="flex items-center justify-between mb-2">
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs text-muted-foreground font-medium">{label}</span>
       <span className="text-sm font-bold text-foreground">{value}</span>
     </div>
-    <div className="h-2 rounded-full bg-muted overflow-hidden">
-      <div className={`h-full rounded-full ${color}`} style={{ width: `${(value / max) * 100}%` }} />
+    <div className="h-2.5 rounded-full bg-muted overflow-hidden">
+      <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${(value / max) * 100}%` }} />
     </div>
   </div>
 );
