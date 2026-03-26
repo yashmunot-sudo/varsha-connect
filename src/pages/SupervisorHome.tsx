@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import { Users, Plus, FileText, ChevronRight, UserCheck, Clock } from 'lucide-react';
+import { Users, Plus, FileText, ChevronRight, UserCheck, Clock, ShoppingCart, XCircle } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
+import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
 import { useTeamAttendance, useTodayCasualWorkers } from '@/hooks/useEmployeeData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 
 const SupervisorHome: React.FC = () => {
   const { lang } = useLanguage();
