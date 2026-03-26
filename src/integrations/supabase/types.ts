@@ -348,6 +348,66 @@ export type Database = {
           },
         ]
       }
+      maintenance_observations: {
+        Row: {
+          employee_id: string
+          id: string
+          machine_area: string
+          observation_text: string
+          photo_url: string | null
+          points_awarded: number
+          reason_text: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          submitted_at: string
+          urgency: string
+        }
+        Insert: {
+          employee_id: string
+          id?: string
+          machine_area: string
+          observation_text: string
+          photo_url?: string | null
+          points_awarded?: number
+          reason_text: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          submitted_at?: string
+          urgency?: string
+        }
+        Update: {
+          employee_id?: string
+          id?: string
+          machine_area?: string
+          observation_text?: string
+          photo_url?: string | null
+          points_awarded?: number
+          reason_text?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          submitted_at?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_observations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_observations_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_scores: {
         Row: {
           attendance_score: number | null
