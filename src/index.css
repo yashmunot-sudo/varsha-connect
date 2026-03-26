@@ -2,68 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 220 15% 7%;
-    --foreground: 220 10% 92%;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 10%;
 
-    --card: 220 14% 10%;
-    --card-foreground: 220 10% 92%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 220 14% 10%;
-    --popover-foreground: 220 10% 92%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 25 95% 53%;
+    --primary: 24 82% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 16%;
-    --secondary-foreground: 220 10% 85%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 42%;
 
-    --muted: 220 12% 18%;
-    --muted-foreground: 220 8% 55%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 145 63% 42%;
+    --accent: 24 82% 53%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 74% 47%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 12% 20%;
-    --input: 220 12% 20%;
-    --ring: 25 95% 53%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 24 82% 53%;
 
     --radius: 0.75rem;
 
-    /* Custom tokens */
-    --success: 145 63% 42%;
-    --warning: 45 93% 47%;
+    --success: 125 44% 33%;
+    --warning: 28 100% 48%;
     --info: 217 91% 60%;
-    --danger: 0 72% 51%;
-    
-    --surface: 220 14% 12%;
-    --surface-elevated: 220 14% 15%;
-    
-    --checkin-green: 145 76% 40%;
-    --checkout-red: 0 72% 51%;
-    --late-yellow: 45 93% 47%;
-    --absent-red: 0 72% 51%;
+    --danger: 0 74% 47%;
+
+    --surface: 0 0% 98%;
+    --surface-elevated: 0 0% 100%;
+
+    --checkin-green: 125 44% 33%;
+    --checkout-red: 0 74% 47%;
+    --late-yellow: 28 100% 48%;
+    --absent-red: 0 74% 47%;
     --leave-purple: 263 70% 50%;
     --overtime-blue: 217 91% 60%;
-    
-    --font-display: 'Syne', sans-serif;
-    --font-body: 'Noto Sans Devanagari', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
 
-    --sidebar-background: 220 14% 10%;
-    --sidebar-foreground: 220 10% 85%;
-    --sidebar-primary: 25 95% 53%;
+    --font-display: 'Inter', sans-serif;
+    --font-body: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    --font-mono: 'Inter', monospace;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 42%;
+    --sidebar-primary: 24 82% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 16%;
-    --sidebar-accent-foreground: 220 10% 85%;
-    --sidebar-border: 220 12% 20%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 42%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 24 82% 53%;
   }
 }
 
@@ -79,7 +78,6 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Prevent overscroll/bounce */
   html, body {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
@@ -90,54 +88,45 @@
   .font-display {
     font-family: var(--font-display);
   }
-  
+
   .font-mono {
     font-family: var(--font-mono);
   }
-  
+
   .font-body {
     font-family: var(--font-body);
-  }
-  
-  .text-gradient-fire {
-    background: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(40, 95%, 55%));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   .bg-surface {
     background-color: hsl(var(--surface));
   }
-  
+
   .bg-surface-elevated {
     background-color: hsl(var(--surface-elevated));
   }
-  
+
   .glow-primary {
-    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.4);
-  }
-  
-  .glow-success {
-    box-shadow: 0 0 30px -5px hsl(var(--success) / 0.5);
-  }
-  
-  .glow-danger {
-    box-shadow: 0 0 30px -5px hsl(var(--danger) / 0.5);
+    box-shadow: 0 4px 14px -3px hsl(var(--primary) / 0.3);
   }
 
-  /* Large touch targets for workers */
+  .glow-success {
+    box-shadow: 0 4px 14px -3px hsl(var(--success) / 0.3);
+  }
+
+  .glow-danger {
+    box-shadow: 0 4px 14px -3px hsl(var(--danger) / 0.3);
+  }
+
   .touch-target {
     min-height: 56px;
     min-width: 56px;
   }
-  
+
   .touch-target-xl {
     min-height: 80px;
     min-width: 80px;
   }
 
-  /* Status indicator dots */
   .status-dot {
     width: 12px;
     height: 12px;
@@ -148,11 +137,11 @@
   .status-present {
     background-color: hsl(var(--success));
   }
-  
+
   .status-absent {
     background-color: hsl(var(--danger));
   }
-  
+
   .status-late {
     background-color: hsl(var(--warning));
   }
@@ -160,9 +149,12 @@
   .status-leave {
     background-color: hsl(var(--leave-purple));
   }
+
+  .card-shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  }
 }
 
-/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -176,7 +168,6 @@
   border-radius: 4px;
 }
 
-/* Safe area for PWA */
 @supports (padding: env(safe-area-inset-bottom)) {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);

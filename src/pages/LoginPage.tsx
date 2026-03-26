@@ -4,6 +4,7 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { UserRole, USER_ROLES } from '@/lib/constants';
 import { Phone, Shield, Globe, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
+import vflLogo from '@/assets/vfl-logo.jpeg';
 
 const LoginPage: React.FC = () => {
   const { sendOTP, verifyOTP, setDemoUser } = useAuth();
@@ -42,29 +43,24 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <div className="relative overflow-hidden border-b border-border">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: 'linear-gradient(hsl(var(--border)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }} />
-        <div className="relative px-6 pt-12 pb-8">
-          <div className="flex items-center justify-between mb-8">
-            <span className="font-mono text-[10px] text-primary tracking-[0.25em] uppercase">Plant Ops · 2026</span>
+      {/* Header with logo */}
+      <div className="relative overflow-hidden">
+        <div className="relative px-6 pt-12 pb-8 flex flex-col items-center">
+          <div className="flex items-center justify-between w-full mb-8">
+            <span className="text-[10px] text-muted-foreground tracking-[0.25em] uppercase">Plant Ops · 2026</span>
             <button
               onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')}
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-mono text-muted-foreground border border-border hover:bg-secondary transition-colors"
+              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs text-muted-foreground border border-border hover:bg-muted transition-colors"
             >
               <Globe className="w-3.5 h-3.5" />
               {lang === 'hi' ? 'English' : 'हिंदी'}
             </button>
           </div>
-          <h1 className="font-display text-3xl font-extrabold leading-none mb-2">
-            <span className="text-muted-foreground">{lang === 'hi' ? 'एक ऐप।' : 'One App.'}</span><br />
-            <span className="text-gradient-fire">{lang === 'hi' ? 'वर्षा फोर्जिंग्स' : 'Varsha Forgings'}</span>
+          <img src={vflLogo} alt="Varsha Forgings" className="w-24 h-24 rounded-2xl object-contain mb-4" />
+          <h1 className="font-display text-2xl font-extrabold text-foreground text-center leading-tight mb-1">
+            {lang === 'hi' ? 'वर्षा फोर्जिंग्स' : 'Varsha Forgings'}
           </h1>
-          <p className="text-sm text-muted-foreground mt-3 max-w-xs">
+          <p className="text-sm text-muted-foreground text-center">
             {lang === 'hi'
               ? 'हाज़िरी · प्रदर्शन · शिफ्ट · पेरोल'
               : 'Attendance · Performance · Shifts · Payroll'}
@@ -77,7 +73,7 @@ const LoginPage: React.FC = () => {
           <>
             <button
               onClick={() => setStep('phone')}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary transition-colors"
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors"
             >
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Phone className="w-5 h-5 text-primary" />
@@ -95,7 +91,7 @@ const LoginPage: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <span className="font-mono text-[10px] text-primary tracking-[0.2em] uppercase">
+                <span className="text-[10px] text-primary font-semibold tracking-[0.2em] uppercase">
                   {lang === 'hi' ? 'डेमो रोल चुनें' : 'Select Demo Role'}
                 </span>
                 <div className="flex-1 h-px bg-border" />
@@ -105,14 +101,14 @@ const LoginPage: React.FC = () => {
                   <button
                     key={role}
                     onClick={() => handleDemoLogin(role)}
-                    className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-secondary transition-all group"
+                    className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:border-primary/50 hover:bg-muted transition-all group"
                   >
                     <span className="text-2xl">{info.icon}</span>
                     <div className="flex-1 text-left">
                       <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
                         {lang === 'hi' ? info.label_hi : info.label_en}
                       </div>
-                      <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
                         {role.replace('_', ' ')}
                       </div>
                     </div>
@@ -134,14 +130,14 @@ const LoginPage: React.FC = () => {
                 {lang === 'hi' ? 'फ़ोन नंबर' : 'Phone Number'}
               </label>
               <div className="flex gap-2">
-                <span className="flex items-center px-3 rounded-lg border border-border bg-muted text-sm font-mono text-muted-foreground">+91</span>
+                <span className="flex items-center px-3 rounded-xl border border-border bg-muted text-sm text-muted-foreground">+91</span>
                 <input
                   type="tel"
                   maxLength={10}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                   placeholder="9876543210"
-                  className="flex-1 rounded-lg border border-border bg-card px-4 py-3 text-lg font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
             </div>
@@ -172,7 +168,7 @@ const LoginPage: React.FC = () => {
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
               placeholder="● ● ● ● ● ●"
-              className="w-full rounded-lg border border-border bg-card px-4 py-4 text-2xl font-mono text-center text-foreground tracking-[0.5em] placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full rounded-xl border border-border bg-card px-4 py-4 text-2xl text-center text-foreground tracking-[0.5em] placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
             <button
               onClick={handleVerifyOTP}
@@ -186,7 +182,7 @@ const LoginPage: React.FC = () => {
       </div>
 
       <div className="px-6 py-4 border-t border-border">
-        <p className="text-center font-mono text-[10px] text-muted-foreground tracking-wider">
+        <p className="text-center text-[10px] text-muted-foreground tracking-wider">
           VARSHA FORGINGS PVT LTD · AURANGABAD
         </p>
       </div>
