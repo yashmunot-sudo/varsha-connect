@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { Home, Calendar, BarChart3, FileText, Menu, Users, Settings, ClipboardList, TrendingUp } from 'lucide-react';
+import { Home, Calendar, BarChart3, FileText, Menu, Users, Settings, ClipboardList, TrendingUp, ShoppingCart, Mail } from 'lucide-react';
 import { UserRole } from '@/lib/constants';
 
 interface BottomNavProps {
