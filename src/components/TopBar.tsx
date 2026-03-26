@@ -1,13 +1,15 @@
 import React from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Globe, LogOut } from 'lucide-react';
+import { Globe, LogOut, Bell } from 'lucide-react';
 import { USER_ROLES } from '@/lib/constants';
+import { useUnreadCount } from '@/components/NotificationsPanel';
 import vflLogo from '@/assets/vfl-logo.jpeg';
 
 const TopBar: React.FC = () => {
   const { lang, setLang } = useLanguage();
   const { user, logout } = useAuth();
+  const { data: unread } = useUnreadCount(user?.employeeId);
 
   if (!user) return null;
 
@@ -32,6 +34,14 @@ const TopBar: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
+          <button className="relative rounded-full p-2 text-muted-foreground hover:bg-muted transition-colors">
+            <Bell className="w-4 h-4" />
+            {unread && unread > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
+          </button>
           <button
             onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')}
             className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] text-muted-foreground border border-border/60 hover:bg-muted transition-colors font-medium"
