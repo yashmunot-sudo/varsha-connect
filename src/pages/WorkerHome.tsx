@@ -62,10 +62,24 @@ const WorkerHome: React.FC = () => {
         return;
       }
 
+      // Validate QR token for today
+      const now = new Date();
+      const { data: validToken } = await supabase
+        .from('qr_tokens')
+        .select('*')
+        .eq('valid_date', today)
+        .lte('valid_from', now.toISOString())
+        .gte('valid_until', now.toISOString())
+        .limit(1)
+        .maybeSingle();
+
+      const qrValid = !!validToken;
+
+      // Step 1: Save attendance record
       const { error } = await supabase.from('attendance').upsert({
         employee_id: user.employeeId,
         attendance_date: today,
-        check_in_time: new Date().toISOString(),
+        check_in_time: now.toISOString(),
         check_in_lat: lat,
         check_in_lng: lng,
         is_inside_geofence: inside,
@@ -76,10 +90,27 @@ const WorkerHome: React.FC = () => {
 
       if (error) {
         toast.error(error.message);
-      } else {
-        toast.success(lang === 'hi' ? '✓ उपस्थित दर्ज हुई' : '✓ Attendance recorded');
-        queryClient.invalidateQueries({ queryKey: ['attendance'] });
+        setCheckingIn(false);
+        return;
       }
+
+      // Step 1: Save checkpoint 1 (GPS + QR)
+      const { error: cpError } = await supabase.from('attendance_checkpoints').insert({
+        employee_id: user.employeeId,
+        attendance_date: today,
+        checkpoint_1_time: now.toISOString(),
+        checkpoint_1_gps_lat: lat,
+        checkpoint_1_gps_lng: lng,
+        checkpoint_1_qr_valid: qrValid,
+        checkpoint_1_mock_location: false,
+      });
+
+      if (cpError) {
+        console.error('Checkpoint save error:', cpError);
+      }
+
+      toast.success(lang === 'hi' ? '✓ चेकपॉइंट 1 पूरा — उपस्थित दर्ज' : '✓ Checkpoint 1 done — Attendance recorded');
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
     } catch (err) {
       setLocationError(lang === 'hi' ? 'कृपया स्थान सेवाएं चालू करें' : 'Please enable location services');
     }

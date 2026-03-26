@@ -3,8 +3,10 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import { BarChart3, Users, FileCheck, Award, ChevronRight, TrendingUp, Check, XIcon, Briefcase } from 'lucide-react';
+import { BarChart3, Users, FileCheck, Award, ChevronRight, TrendingUp, Check, XIcon, Briefcase, ClipboardList, ShoppingCart } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
+import MRMReviewTab from '@/components/MRMReviewTab';
+import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
 import { useAllEmployees, useTodayAttendanceAll, useAllScores } from '@/hooks/useEmployeeData';
 import { usePendingLeaveRequests, usePendingAdvanceRequests } from '@/hooks/useRequestData';
 import { supabase } from '@/integrations/supabase/client';
@@ -195,6 +197,26 @@ const ManagerHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'mrm') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <MRMReviewTab />
+        <BottomNav role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'purchase') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <PurchaseRequisitionTab />
+        <BottomNav role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
   if (activeTab === 'more') {
     return <MoreMenu role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
   }
@@ -252,6 +274,8 @@ const ManagerHome: React.FC = () => {
             { tab: 'attendance', icon: BarChart3, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'विभाग उपस्थिति' : 'Dept. Attendance' },
             { tab: 'approvals', icon: FileCheck, color: 'bg-warning/10', iconColor: 'text-warning', label: lang === 'hi' ? 'स्वीकृतियाँ' : 'Approvals', badge: totalPending },
             { tab: 'kpi', icon: TrendingUp, color: 'bg-primary/10', iconColor: 'text-primary', label: 'KPI' },
+            { tab: 'mrm', icon: ClipboardList, color: 'bg-success/10', iconColor: 'text-success', label: lang === 'hi' ? 'समीक्षा / MRM' : 'MRM Review' },
+            { tab: 'purchase', icon: ShoppingCart, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'खरीद' : 'Purchase' },
           ].map(item => (
             <button key={item.tab} onClick={() => setActiveTab(item.tab)} className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-shadow hover:bg-muted/50 transition-all active:scale-[0.98]">
               <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center`}>

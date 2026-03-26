@@ -3,8 +3,11 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import { Users, AlertTriangle, Award, IndianRupee, Heart, ChevronRight, TrendingUp, Factory, Zap } from 'lucide-react';
+import { Users, AlertTriangle, Award, IndianRupee, Heart, ChevronRight, TrendingUp, Factory, Zap, ClipboardList, Mail, ShoppingCart } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
+import MRMReviewTab from '@/components/MRMReviewTab';
+import EmailTasksTab from '@/components/EmailTasksTab';
+import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
 import { useAllEmployees, useTodayAttendanceAll, useAllScores } from '@/hooks/useEmployeeData';
 
 const OwnerHome: React.FC = () => {
@@ -108,6 +111,36 @@ const OwnerHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'mrm') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <MRMReviewTab />
+        <BottomNav role="owner" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'email') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <EmailTasksTab />
+        <BottomNav role="owner" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'purchase') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <PurchaseRequisitionTab />
+        <BottomNav role="owner" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
+  }
+
   if (activeTab === 'more') {
     return <MoreMenu role="owner" activeTab={activeTab} onTabChange={setActiveTab} />;
   }
@@ -189,6 +222,20 @@ const OwnerHome: React.FC = () => {
               <AlertTriangle className="w-5 h-5 text-warning" />
             </div>
             <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'ध्यान देने की ज़रूरत' : 'Needs Attention'}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button onClick={() => setActiveTab('mrm')} className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-shadow hover:bg-muted/50 transition-all active:scale-[0.98]">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+              <ClipboardList className="w-5 h-5 text-success" />
+            </div>
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'समीक्षा / MRM' : 'MRM Review'}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button onClick={() => setActiveTab('email')} className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-shadow hover:bg-muted/50 transition-all active:scale-[0.98]">
+            <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
+              <Mail className="w-5 h-5 text-info" />
+            </div>
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'ईमेल कार्य' : 'Email Tasks'}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>

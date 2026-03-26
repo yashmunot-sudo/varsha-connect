@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { Home, Calendar, BarChart3, FileText, Menu, Users, Settings, ClipboardList, TrendingUp } from 'lucide-react';
+import { Home, Calendar, BarChart3, FileText, Menu, Users, Settings, ClipboardList, TrendingUp, ShoppingCart, Mail } from 'lucide-react';
 import { UserRole } from '@/lib/constants';
 
 interface BottomNavProps {
@@ -27,9 +27,9 @@ const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; labe
   ],
   manager: [
     { id: 'home', icon: Home, label_hi: 'होम', label_en: 'Home' },
-    { id: 'attendance', icon: Calendar, label_hi: 'हाज़िरी', label_en: 'Attendance' },
-    { id: 'kpi', icon: TrendingUp, label_hi: 'KPI', label_en: 'KPI' },
     { id: 'approvals', icon: FileText, label_hi: 'स्वीकृति', label_en: 'Approvals' },
+    { id: 'mrm', icon: ClipboardList, label_hi: 'समीक्षा', label_en: 'MRM' },
+    { id: 'purchase', icon: ShoppingCart, label_hi: 'खरीद', label_en: 'PR' },
     { id: 'more', icon: Menu, label_hi: 'और', label_en: 'More' },
   ],
   hr_admin: [
@@ -41,15 +41,16 @@ const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; labe
   ],
   owner: [
     { id: 'home', icon: Home, label_hi: 'होम', label_en: 'Home' },
-    { id: 'costs', icon: BarChart3, label_hi: 'लागत', label_en: 'Costs' },
-    { id: 'people', icon: Users, label_hi: 'लोग', label_en: 'People' },
+    { id: 'mrm', icon: ClipboardList, label_hi: 'समीक्षा', label_en: 'MRM' },
+    { id: 'email', icon: Mail, label_hi: 'ईमेल', label_en: 'Email' },
+    { id: 'purchase', icon: ShoppingCart, label_hi: 'खरीद', label_en: 'PR' },
     { id: 'more', icon: Menu, label_hi: 'और', label_en: 'More' },
   ],
   plant_head: [
     { id: 'home', icon: Home, label_hi: 'होम', label_en: 'Home' },
-    { id: 'departments', icon: Users, label_hi: 'विभाग', label_en: 'Depts' },
-    { id: 'tasks', icon: ClipboardList, label_hi: 'कार्य', label_en: 'Tasks' },
     { id: 'approvals', icon: FileText, label_hi: 'स्वीकृति', label_en: 'Approvals' },
+    { id: 'mrm', icon: ClipboardList, label_hi: 'समीक्षा', label_en: 'MRM' },
+    { id: 'email', icon: Mail, label_hi: 'ईमेल', label_en: 'Email' },
     { id: 'more', icon: Menu, label_hi: 'और', label_en: 'More' },
   ],
   security_guard: [

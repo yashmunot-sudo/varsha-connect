@@ -5,8 +5,11 @@ import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { useTodayAttendanceAll, useAllEmployees, useAllScores } from '@/hooks/useEmployeeData';
 import { usePendingLeaveRequests, usePendingAdvanceRequests } from '@/hooks/useRequestData';
-import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2, Check, XIcon } from 'lucide-react';
+import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2, Check, XIcon, Mail, ClipboardList, ShoppingCart } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
+import MRMReviewTab from '@/components/MRMReviewTab';
+import EmailTasksTab from '@/components/EmailTasksTab';
+import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -60,6 +63,36 @@ const PlantHeadHome: React.FC = () => {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? (lang === 'hi' ? 'सुप्रभात' : 'Good Morning') : hour < 17 ? (lang === 'hi' ? 'नमस्कार' : 'Good Afternoon') : (lang === 'hi' ? 'शुभ संध्या' : 'Good Evening');
+
+  if (activeTab === 'mrm') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <MRMReviewTab />
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'email') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <EmailTasksTab />
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'purchase') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <PurchaseRequisitionTab />
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
 
   if (activeTab === 'more') {
     return <MoreMenu role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
