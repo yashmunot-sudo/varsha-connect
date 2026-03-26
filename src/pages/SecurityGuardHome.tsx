@@ -30,8 +30,8 @@ const SecurityGuardHome: React.FC = () => {
       const { data, error } = await supabase
         .from('vehicle_log')
         .select('*')
-        .eq('entry_date', today)
-        .order('entry_time', { ascending: false });
+        .eq('log_date', today)
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
