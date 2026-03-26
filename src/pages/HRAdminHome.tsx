@@ -185,6 +185,11 @@ const HRAdminHome: React.FC = () => {
             <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'अग्रिम प्रविष्टि' : 'Advance Entry'}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
+          <button onClick={() => setActiveTab('maintenance')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
+            <Wrench className="w-5 h-5 text-success" />
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'रखरखाव अवलोकन' : 'Maintenance Overview'}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
       </div>
       <BottomNav role="hr_admin" activeTab={activeTab} onTabChange={setActiveTab} />
