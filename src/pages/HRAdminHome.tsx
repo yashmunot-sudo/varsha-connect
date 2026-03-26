@@ -448,4 +448,113 @@ const ShiftPlanner: React.FC<{ lang: string; user: any; activeTab: string; setAc
   );
 };
 
+// Maintenance Overview for HR
+const MaintenanceOverview: React.FC<{ lang: string; activeTab: string; setActiveTab: (t: string) => void }> = ({ lang, activeTab, setActiveTab }) => {
+  const queryClient = useQueryClient();
+  const { data: observations } = useAllMaintenanceObservations();
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filtered = observations?.filter((o: any) => statusFilter === 'all' || o.status === statusFilter) || [];
+
+  const urgencyColor: Record<string, string> = {
+    'Urgent': 'bg-danger/10 text-danger',
+    'Needs attention soon': 'bg-warning/10 text-warning',
+    'Can wait': 'bg-muted text-muted-foreground',
+  };
+
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    const { error } = await supabase.from('maintenance_observations').update({
+      status: newStatus,
+      ...(newStatus === 'Resolved' ? { resolved_at: new Date().toISOString() } : {}),
+    } as any).eq('id', id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === 'hi' ? 'स्थिति अपडेट हुई' : 'Status updated');
+      queryClient.invalidateQueries({ queryKey: ['all_maintenance_observations'] });
+    }
+  };
+
+  const statusCounts = {
+    Reported: observations?.filter((o: any) => o.status === 'Reported').length || 0,
+    'In Progress': observations?.filter((o: any) => o.status === 'In Progress').length || 0,
+    Resolved: observations?.filter((o: any) => o.status === 'Resolved').length || 0,
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <TopBar />
+      <div className="px-4 py-4 space-y-4">
+        <h2 className="font-display text-lg font-bold text-foreground">{lang === 'hi' ? 'रखरखाव अवलोकन' : 'Maintenance Overview'}</h2>
+
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-danger/10 border border-danger/30 rounded-xl p-2">
+            <div className="font-display text-lg font-bold text-danger">{statusCounts.Reported}</div>
+            <div className="text-[9px] text-muted-foreground">{lang === 'hi' ? 'रिपोर्ट' : 'Reported'}</div>
+          </div>
+          <div className="bg-warning/10 border border-warning/30 rounded-xl p-2">
+            <div className="font-display text-lg font-bold text-warning">{statusCounts['In Progress']}</div>
+            <div className="text-[9px] text-muted-foreground">{lang === 'hi' ? 'प्रगति में' : 'In Progress'}</div>
+          </div>
+          <div className="bg-success/10 border border-success/30 rounded-xl p-2">
+            <div className="font-display text-lg font-bold text-success">{statusCounts.Resolved}</div>
+            <div className="text-[9px] text-muted-foreground">{lang === 'hi' ? 'हल हुआ' : 'Resolved'}</div>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          {['all', 'Reported', 'In Progress', 'Resolved'].map(s => (
+            <button key={s} onClick={() => setStatusFilter(s)} className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${statusFilter === s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+              {s === 'all' ? (lang === 'hi' ? 'सभी' : 'All') : s}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          {filtered.map((obs: any) => (
+            <div key={obs.id} className="bg-card rounded-xl border border-border card-shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">{obs.employees?.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{obs.employees?.emp_code} · {obs.employees?.department}</div>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${urgencyColor[obs.urgency] || 'bg-muted'}`}>{obs.urgency}</span>
+              </div>
+              <div className="text-xs text-foreground font-medium mb-1">{obs.machine_area}</div>
+              <div className="text-xs text-muted-foreground mb-1">{obs.observation_text}</div>
+              <div className="text-xs text-muted-foreground mb-2 italic">{obs.reason_text}</div>
+              {obs.photo_url && (
+                <img src={obs.photo_url} alt="maintenance" className="w-full h-32 object-cover rounded-lg mb-2" />
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground">
+                  {new Date(obs.submitted_at).toLocaleDateString('en-IN')} · {obs.points_awarded} pts
+                </span>
+                {obs.status !== 'Resolved' && (
+                  <div className="flex gap-1">
+                    {obs.status === 'Reported' && (
+                      <button onClick={() => handleStatusUpdate(obs.id, 'In Progress')} className="text-[10px] px-2 py-1 rounded bg-warning/20 text-warning font-semibold">
+                        {lang === 'hi' ? 'प्रगति में' : 'In Progress'}
+                      </button>
+                    )}
+                    <button onClick={() => handleStatusUpdate(obs.id, 'Resolved')} className="text-[10px] px-2 py-1 rounded bg-success/20 text-success font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> {lang === 'hi' ? 'हल हुआ' : 'Resolved'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="text-center text-sm text-muted-foreground py-8">
+              {lang === 'hi' ? 'कोई अवलोकन नहीं' : 'No observations'}
+            </div>
+          )}
+        </div>
+      </div>
+      <BottomNav role="hr_admin" activeTab={activeTab} onTabChange={setActiveTab} />
+    </div>
+  );
+};
+
 export default HRAdminHome;
