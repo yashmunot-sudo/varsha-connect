@@ -3,9 +3,10 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import { MapPin, Clock, Camera, Star, Calendar, Award, FileText, Banknote, ChevronRight, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { MapPin, Clock, Camera, Star, Calendar, Award, FileText, Banknote, ChevronRight, CheckCircle2, XCircle, Loader2, X } from 'lucide-react';
 import { getCurrentPosition, isInsideGeofence } from '@/lib/geofence';
 import { useMyAttendance, useMyLeaveBalance, useMyScore, useMyShift } from '@/hooks/useEmployeeData';
+import { useMyAdvanceBalance } from '@/hooks/useRequestData';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -18,13 +19,15 @@ const WorkerHome: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [checkingIn, setCheckingIn] = useState(false);
   const [locationError, setLocationError] = useState('');
+  const [showLeaveForm, setShowLeaveForm] = useState(false);
+  const [showAdvanceForm, setShowAdvanceForm] = useState(false);
 
   const { data: attendanceRecords } = useMyAttendance(user?.employeeId);
   const { data: leaveBalance } = useMyLeaveBalance(user?.employeeId);
   const { data: score } = useMyScore(user?.employeeId);
   const { data: todayShift } = useMyShift(user?.employeeId);
+  const { data: advanceData } = useMyAdvanceBalance(user?.employeeId);
 
-  // Check if already checked in today
   const today = new Date().toISOString().split('T')[0];
   const todayAtt = attendanceRecords?.find(a => a.attendance_date === today);
   const checkedIn = todayAtt?.check_in_time && !todayAtt?.check_out_time;
@@ -91,7 +94,6 @@ const WorkerHome: React.FC = () => {
         queryClient.invalidateQueries({ queryKey: ['attendance'] });
       }
     } catch {
-      // Check out without GPS if location fails
       await supabase.from('attendance').update({
         check_out_time: new Date().toISOString(),
       }).eq('employee_id', user.employeeId).eq('attendance_date', today);
@@ -111,12 +113,14 @@ const WorkerHome: React.FC = () => {
   const totalDays = attendanceRecords?.length || 1;
   const attendancePct = Math.round((presentCount / Math.max(totalDays, 1)) * 100);
 
+  const closingBalance = advanceData?.closing_balance ?? 0;
+
   if (activeTab === 'attendance') {
     return (
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
         <div className="px-4 py-4 space-y-4">
-          <h2 className="font-display text-lg font-bold">
+          <h2 className="font-display text-lg font-bold text-foreground">
             {lang === 'hi' ? 'उपस्थिति कैलेंडर' : 'Attendance Calendar'}
           </h2>
           <AttendanceCalendar lang={lang} records={attendanceRecords || []} />
@@ -136,10 +140,10 @@ const WorkerHome: React.FC = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
         <div className="px-4 py-4 space-y-4">
-          <h2 className="font-display text-lg font-bold">{lang === 'hi' ? 'मेरा स्कोर' : 'My Score'}</h2>
-          <div className="bg-card rounded-xl border border-border p-6 text-center">
+          <h2 className="font-display text-lg font-bold text-foreground">{lang === 'hi' ? 'मेरा स्कोर' : 'My Score'}</h2>
+          <div className="bg-card rounded-xl border border-border card-shadow p-6 text-center">
             <div className="font-display text-5xl font-extrabold text-primary mb-2">{compositeScore}</div>
-            <div className="font-mono text-xs text-muted-foreground tracking-wider uppercase">
+            <div className="text-xs text-muted-foreground tracking-wider uppercase">
               {lang === 'hi' ? 'इस महीने का स्कोर' : 'This Month Score'}
             </div>
           </div>
@@ -148,10 +152,10 @@ const WorkerHome: React.FC = () => {
             <ScoreRow label={lang === 'hi' ? 'प्रदर्शन (40%)' : 'Performance (40%)'} value={Math.round(Number(score?.performance_score || 0))} max={100} color="bg-info" />
             <ScoreRow label={lang === 'hi' ? 'अवलोकन (20%)' : 'Observations (20%)'} value={Math.round(Number(score?.observation_score || 0))} max={100} color="bg-primary" />
           </div>
-          <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+          <div className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center gap-3">
             <Award className="w-8 h-8 text-warning" />
             <div>
-              <div className="font-display text-sm font-bold">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}: #{eotmRank}</div>
+              <div className="font-display text-sm font-bold text-foreground">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}: #{eotmRank}</div>
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'टॉप 5 में हैं! बढ़िया!' : 'Keep going!'}</div>
             </div>
           </div>
@@ -166,16 +170,52 @@ const WorkerHome: React.FC = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
         <div className="px-4 py-4 space-y-4">
-          <h2 className="font-display text-lg font-bold">{lang === 'hi' ? 'छुट्टी शेष' : 'Leave Balance'}</h2>
-          <div className="grid grid-cols-3 gap-3">
-            <LeaveCard type={lang === 'hi' ? 'अर्जित' : 'EL'} balance={el} total={20} color="bg-info" />
-            <LeaveCard type={lang === 'hi' ? 'आकस्मिक' : 'CL'} balance={cl} total={7} color="bg-warning" />
-            <LeaveCard type={lang === 'hi' ? 'बीमारी' : 'SL'} balance={sl} total={7} color="bg-danger" />
+          <h2 className="font-display text-lg font-bold text-foreground">{lang === 'hi' ? 'छुट्टी और अग्रिम' : 'Leave & Advance'}</h2>
+          {/* Leave Balance Card */}
+          <div className="bg-card rounded-xl border border-border card-shadow p-4">
+            <div className="text-xs text-muted-foreground tracking-wider uppercase mb-3">
+              {lang === 'hi' ? 'छुट्टी शेष' : 'Leave Balance'}
+            </div>
+            <div className="grid grid-cols-3 gap-4 text-center mb-4">
+              <div>
+                <div className="font-display text-2xl font-bold text-info">{el}</div>
+                <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'अर्जित' : 'EL'}</div>
+              </div>
+              <div>
+                <div className="font-display text-2xl font-bold text-warning">{cl}</div>
+                <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'आकस्मिक' : 'CL'}</div>
+              </div>
+              <div>
+                <div className="font-display text-2xl font-bold text-danger">{sl}</div>
+                <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'बीमारी' : 'SL'}</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowLeaveForm(true)}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target"
+            >
+              {lang === 'hi' ? 'छुट्टी के लिए आवेदन / Apply for Leave' : 'Apply for Leave / छुट्टी के लिए आवेदन'}
+            </button>
           </div>
-          <QuickAction icon={FileText} label={lang === 'hi' ? 'छुट्टी के लिए आवेदन' : 'Apply Leave'} sub={lang === 'hi' ? 'Google Form खुलेगा' : 'Opens Google Form'} />
-          <QuickAction icon={Banknote} label={lang === 'hi' ? 'अग्रिम के लिए आवेदन' : 'Apply Advance'} sub={lang === 'hi' ? 'Google Form खुलेगा' : 'Opens Google Form'} />
+
+          {/* Salary Advance Card */}
+          <div className="bg-card rounded-xl border border-border card-shadow p-4">
+            <div className="text-xs text-muted-foreground tracking-wider uppercase mb-2">
+              {lang === 'hi' ? 'बकाया अग्रिम' : 'Outstanding Advance'}
+            </div>
+            <div className="font-display text-2xl font-bold text-foreground mb-4">₹{closingBalance}</div>
+            <button
+              onClick={() => setShowAdvanceForm(true)}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target"
+            >
+              {lang === 'hi' ? 'अग्रिम के लिए आवेदन / Apply for Advance' : 'Apply for Advance / अग्रिम के लिए आवेदन'}
+            </button>
+          </div>
         </div>
         <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
+        {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
       </div>
     );
   }
@@ -185,7 +225,7 @@ const WorkerHome: React.FC = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
         <div className="px-4 py-4 space-y-3">
-          <h2 className="font-display text-lg font-bold mb-4">{lang === 'hi' ? 'और विकल्प' : 'More Options'}</h2>
+          <h2 className="font-display text-lg font-bold text-foreground mb-4">{lang === 'hi' ? 'और विकल्प' : 'More Options'}</h2>
           <QuickAction icon={Star} label={lang === 'hi' ? 'EoTM लीडरबोर्ड' : 'EoTM Leaderboard'} sub={lang === 'hi' ? 'रैंकिंग देखें' : 'View rankings'} />
           <QuickAction icon={Banknote} label={lang === 'hi' ? 'मेरा वेतन' : 'My Pay'} sub={lang === 'hi' ? 'वेतन अनुमान' : 'Salary estimate'} />
           <QuickAction icon={Camera} label={lang === 'hi' ? 'रखरखाव अवलोकन' : 'Maintenance Obs.'} sub={lang === 'hi' ? '+15 अंक' : '+15 points'} />
@@ -205,14 +245,14 @@ const WorkerHome: React.FC = () => {
       <TopBar />
       <div className="px-4 py-4 space-y-4">
         {/* Today's shift info */}
-        <div className="bg-card rounded-xl border border-border p-4">
+        <div className="bg-card rounded-xl border border-border card-shadow p-4">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-primary" />
-            <span className="font-mono text-[10px] text-primary tracking-[0.2em] uppercase">
+            <span className="text-[10px] text-primary tracking-[0.2em] uppercase font-semibold">
               {lang === 'hi' ? 'आज की शिफ्ट' : "TODAY'S SHIFT"}
             </span>
           </div>
-          <div className="font-display text-lg font-bold">
+          <div className="font-display text-lg font-bold text-foreground">
             {shiftInfo
               ? `${lang === 'hi' ? shiftInfo.label_hi : shiftInfo.label_en} · ${shiftInfo.start} – ${shiftInfo.end}`
               : (lang === 'hi' ? 'कोई शिफ्ट निर्धारित नहीं' : 'No shift assigned')}
@@ -221,7 +261,7 @@ const WorkerHome: React.FC = () => {
 
         {/* Check-in / Check-out button */}
         {checkedOut ? (
-          <div className="bg-muted/50 border border-border rounded-xl p-4 text-center">
+          <div className="bg-muted border border-border rounded-xl p-4 text-center">
             <CheckCircle2 className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
             <div className="text-sm text-muted-foreground">{lang === 'hi' ? 'आज का दिन पूरा' : "Today's shift complete"}</div>
           </div>
@@ -229,7 +269,7 @@ const WorkerHome: React.FC = () => {
           <button
             onClick={handleCheckIn}
             disabled={checkingIn}
-            className="w-full py-8 rounded-2xl bg-accent text-accent-foreground font-display font-extrabold text-xl transition-all touch-target-xl animate-pulse-glow active:scale-95 disabled:animate-none disabled:opacity-70"
+            className="w-full py-8 rounded-xl bg-primary text-primary-foreground font-display font-extrabold text-xl transition-all touch-target-xl glow-primary active:scale-95 disabled:opacity-70"
           >
             {checkingIn ? (
               <span className="flex items-center justify-center gap-3">
@@ -248,20 +288,20 @@ const WorkerHome: React.FC = () => {
           </button>
         ) : (
           <div className="space-y-3">
-            <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 flex items-center gap-3">
-              <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0" />
+            <div className="bg-success/10 border border-success/30 rounded-xl p-4 flex items-center gap-3">
+              <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0" />
               <div>
-                <div className="font-display text-sm font-bold text-accent">
+                <div className="font-display text-sm font-bold text-success">
                   {lang === 'hi' ? '✓ उपस्थित' : '✓ Present'}
                 </div>
-                <div className="font-mono text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   {lang === 'hi' ? `चेक-इन: ${checkInTimeStr}` : `Checked in: ${checkInTimeStr}`}
                 </div>
               </div>
             </div>
             <button
               onClick={handleCheckOut}
-              className="w-full py-6 rounded-2xl bg-destructive text-destructive-foreground font-display font-extrabold text-lg transition-all touch-target-xl animate-pulse-danger active:scale-95"
+              className="w-full py-6 rounded-xl bg-destructive text-destructive-foreground font-display font-extrabold text-lg transition-all touch-target-xl glow-danger active:scale-95"
             >
               <span className="flex flex-col items-center gap-1">
                 <span>{lang === 'hi' ? 'मैंने काम पूरा किया' : 'I Am Done'}</span>
@@ -282,26 +322,26 @@ const WorkerHome: React.FC = () => {
 
         {/* Quick stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card rounded-xl border border-border p-4">
-            <div className="font-mono text-[10px] text-muted-foreground tracking-wider uppercase mb-1">
+          <div className="bg-card rounded-xl border border-border card-shadow p-4">
+            <div className="text-[10px] text-muted-foreground tracking-wider uppercase mb-1">
               {lang === 'hi' ? 'हाज़िरी' : 'Attendance'}
             </div>
-            <div className="font-display text-2xl font-extrabold text-accent">{attendancePct}%</div>
+            <div className="font-display text-2xl font-extrabold text-success">{attendancePct}%</div>
           </div>
-          <div className="bg-card rounded-xl border border-border p-4">
-            <div className="font-mono text-[10px] text-muted-foreground tracking-wider uppercase mb-1">
+          <div className="bg-card rounded-xl border border-border card-shadow p-4">
+            <div className="text-[10px] text-muted-foreground tracking-wider uppercase mb-1">
               {lang === 'hi' ? 'स्कोर' : 'Score'}
             </div>
             <div className="font-display text-2xl font-extrabold text-primary">{compositeScore}</div>
           </div>
         </div>
 
-        {/* Leave balance */}
-        <div className="bg-card rounded-xl border border-border p-4">
-          <div className="font-mono text-[10px] text-muted-foreground tracking-wider uppercase mb-3">
+        {/* Leave Balance Card */}
+        <div className="bg-card rounded-xl border border-border card-shadow p-4">
+          <div className="text-[10px] text-muted-foreground tracking-wider uppercase mb-3">
             {lang === 'hi' ? 'छुट्टी शेष' : 'Leave Balance'}
           </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-3 gap-4 text-center mb-4">
             <div>
               <div className="font-display text-xl font-bold text-info">{el}</div>
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'अर्जित' : 'EL'}</div>
@@ -315,36 +355,192 @@ const WorkerHome: React.FC = () => {
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'बीमारी' : 'SL'}</div>
             </div>
           </div>
+          <button
+            onClick={() => setShowLeaveForm(true)}
+            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target"
+          >
+            {lang === 'hi' ? 'छुट्टी के लिए आवेदन / Apply for Leave' : 'Apply for Leave / छुट्टी के लिए आवेदन'}
+          </button>
+        </div>
+
+        {/* Salary Advance Card */}
+        <div className="bg-card rounded-xl border border-border card-shadow p-4">
+          <div className="text-[10px] text-muted-foreground tracking-wider uppercase mb-2">
+            {lang === 'hi' ? 'बकाया अग्रिम / Outstanding Advance' : 'Outstanding Advance / बकाया अग्रिम'}
+          </div>
+          <div className="font-display text-2xl font-bold text-foreground mb-4">₹{closingBalance}</div>
+          <button
+            onClick={() => setShowAdvanceForm(true)}
+            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target"
+          >
+            {lang === 'hi' ? 'अग्रिम के लिए आवेदन / Apply for Advance' : 'Apply for Advance / अग्रिम के लिए आवेदन'}
+          </button>
         </div>
 
         {/* EoTM rank */}
-        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+        <div className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center gap-3">
           <Award className="w-7 h-7 text-warning" />
           <div className="flex-1">
-            <div className="text-sm font-semibold">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}</div>
+            <div className="text-sm font-semibold text-foreground">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}</div>
             <div className="text-xs text-muted-foreground">#{eotmRank} {lang === 'hi' ? 'इस महीने' : 'this month'}</div>
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
       </div>
       <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
+      {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
+    </div>
+  );
+};
+
+// Leave Application Form Modal
+const LeaveApplicationForm: React.FC<{ lang: string; employeeId?: string; onClose: () => void }> = ({ lang, employeeId, onClose }) => {
+  const [leaveType, setLeaveType] = useState('EL');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!employeeId || !fromDate || !toDate) return;
+    setSubmitting(true);
+    const { error } = await supabase.from('leave_requests').insert({
+      employee_id: employeeId,
+      leave_type: leaveType,
+      from_date: fromDate,
+      to_date: toDate,
+      reason: reason || null,
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === 'hi' ? 'आवेदन भेज दिया गया / Application Submitted' : 'Application Submitted / आवेदन भेज दिया गया');
+      onClose();
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-foreground/50 flex items-end justify-center">
+      <div className="bg-card w-full max-w-lg rounded-t-2xl border-t border-border p-6 space-y-4 animate-slide-up">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold text-foreground">
+            {lang === 'hi' ? 'छुट्टी आवेदन' : 'Leave Application'}
+          </h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted"><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'छुट्टी प्रकार' : 'Leave Type'}</label>
+          <select value={leaveType} onChange={e => setLeaveType(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+            <option value="EL">{lang === 'hi' ? 'अर्जित छुट्टी (EL)' : 'Earned Leave (EL)'}</option>
+            <option value="CL">{lang === 'hi' ? 'आकस्मिक छुट्टी (CL)' : 'Casual Leave (CL)'}</option>
+            <option value="SL">{lang === 'hi' ? 'बीमारी छुट्टी (SL)' : 'Sick Leave (SL)'}</option>
+          </select>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'से' : 'From'}</label>
+            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'तक' : 'To'}</label>
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'कारण (वैकल्पिक)' : 'Reason (optional)'}</label>
+          <input type="text" value={reason} onChange={e => setReason(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={submitting || !fromDate || !toDate}
+          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base touch-target disabled:opacity-50"
+        >
+          {submitting ? '...' : (lang === 'hi' ? 'आवेदन भेजें' : 'Submit Application')}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Advance Application Form Modal
+const AdvanceApplicationForm: React.FC<{ lang: string; employeeId?: string; onClose: () => void }> = ({ lang, employeeId, onClose }) => {
+  const [amount, setAmount] = useState('');
+  const [reason, setReason] = useState('');
+  const [repaymentMonths, setRepaymentMonths] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!employeeId || !amount) return;
+    setSubmitting(true);
+    const { error } = await supabase.from('advance_requests').insert({
+      employee_id: employeeId,
+      amount_requested: parseInt(amount),
+      reason: reason || null,
+      repayment_months: repaymentMonths,
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === 'hi' ? 'आवेदन भेज दिया गया / Application Submitted' : 'Application Submitted / आवेदन भेज दिया गया');
+      onClose();
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-foreground/50 flex items-end justify-center">
+      <div className="bg-card w-full max-w-lg rounded-t-2xl border-t border-border p-6 space-y-4 animate-slide-up">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold text-foreground">
+            {lang === 'hi' ? 'अग्रिम आवेदन' : 'Advance Application'}
+          </h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted"><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'राशि (₹)' : 'Amount (₹)'}</label>
+          <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="w-full rounded-xl border border-border bg-background px-4 py-3 text-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'कारण' : 'Reason'}</label>
+          <input type="text" value={reason} onChange={e => setReason(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'चुकौती अवधि' : 'Repayment Period'}</label>
+          <select value={repaymentMonths} onChange={e => setRepaymentMonths(Number(e.target.value))} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+            <option value={1}>1 {lang === 'hi' ? 'महीना' : 'month'}</option>
+            <option value={2}>2 {lang === 'hi' ? 'महीने' : 'months'}</option>
+            <option value={3}>3 {lang === 'hi' ? 'महीने' : 'months'}</option>
+            <option value={6}>6 {lang === 'hi' ? 'महीने' : 'months'}</option>
+          </select>
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={submitting || !amount}
+          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base touch-target disabled:opacity-50"
+        >
+          {submitting ? '...' : (lang === 'hi' ? 'आवेदन भेजें' : 'Submit Application')}
+        </button>
+      </div>
     </div>
   );
 };
 
 // Sub-components
 const StatCard: React.FC<{ label: string; value: string; color: string }> = ({ label, value, color }) => (
-  <div className="bg-card rounded-xl border border-border p-3 text-center">
+  <div className="bg-card rounded-xl border border-border card-shadow p-3 text-center">
     <div className={`font-display text-xl font-bold ${color}`}>{value}</div>
     <div className="text-[10px] text-muted-foreground mt-1">{label}</div>
   </div>
 );
 
 const ScoreRow: React.FC<{ label: string; value: number; max: number; color: string }> = ({ label, value, max, color }) => (
-  <div className="bg-card rounded-xl border border-border p-4">
+  <div className="bg-card rounded-xl border border-border card-shadow p-4">
     <div className="flex items-center justify-between mb-2">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-mono text-sm font-bold">{value}</span>
+      <span className="text-sm font-bold text-foreground">{value}</span>
     </div>
     <div className="h-2 rounded-full bg-muted overflow-hidden">
       <div className={`h-full rounded-full ${color}`} style={{ width: `${(value / max) * 100}%` }} />
@@ -353,8 +549,8 @@ const ScoreRow: React.FC<{ label: string; value: number; max: number; color: str
 );
 
 const LeaveCard: React.FC<{ type: string; balance: number; total: number; color: string }> = ({ type, balance, total, color }) => (
-  <div className="bg-card rounded-xl border border-border p-4 text-center">
-    <div className="font-display text-2xl font-bold">{balance}</div>
+  <div className="bg-card rounded-xl border border-border card-shadow p-4 text-center">
+    <div className="font-display text-2xl font-bold text-foreground">{balance}</div>
     <div className="text-[10px] text-muted-foreground">/ {total}</div>
     <div className={`h-1 rounded-full mt-2 ${color} opacity-60`} style={{ width: `${(balance / total) * 100}%`, margin: '0 auto' }} />
     <div className="text-xs text-muted-foreground mt-1">{type}</div>
@@ -362,12 +558,12 @@ const LeaveCard: React.FC<{ type: string; balance: number; total: number; color:
 );
 
 const QuickAction: React.FC<{ icon: React.ElementType; label: string; sub: string }> = ({ icon: Icon, label, sub }) => (
-  <button className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary transition-colors">
+  <button className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
       <Icon className="w-5 h-5 text-primary" />
     </div>
     <div className="flex-1 text-left">
-      <div className="text-sm font-semibold">{label}</div>
+      <div className="text-sm font-semibold text-foreground">{label}</div>
       <div className="text-xs text-muted-foreground">{sub}</div>
     </div>
     <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -377,35 +573,35 @@ const QuickAction: React.FC<{ icon: React.ElementType; label: string; sub: strin
 const AttendanceCalendar: React.FC<{ lang: string; records: any[] }> = ({ lang, records }) => {
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay(); // 0=Sun
-  const offset = firstDay === 0 ? 6 : firstDay - 1; // Mon-based offset
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
 
   const statusColors: Record<string, string> = {
-    P: 'bg-success', A: 'bg-danger', L: 'bg-[hsl(var(--leave-purple))]',
-    LC: 'bg-warning', WO: 'bg-muted', H: 'bg-warning', EC: 'bg-warning',
-    OT: 'bg-info', HO: 'bg-muted',
+    P: 'bg-success text-primary-foreground', A: 'bg-danger text-primary-foreground', L: 'bg-[hsl(var(--leave-purple))] text-primary-foreground',
+    LC: 'bg-warning text-primary-foreground', WO: 'bg-muted text-muted-foreground', H: 'bg-warning text-primary-foreground', EC: 'bg-warning text-primary-foreground',
+    OT: 'bg-info text-primary-foreground', HO: 'bg-muted text-muted-foreground',
   };
 
   const days = Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const record = records.find(r => r.attendance_date === dateStr);
-    return { day, status: record?.status || (day <= now.getDate() ? null : null) };
+    return { day, status: record?.status || null };
   });
 
   return (
-    <div className="bg-card rounded-xl border border-border p-4">
+    <div className="bg-card rounded-xl border border-border card-shadow p-4">
       <div className="grid grid-cols-7 gap-1.5">
         {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
-          <div key={d} className="text-center text-[10px] font-mono text-muted-foreground py-1">{d}</div>
+          <div key={d} className="text-center text-[10px] text-muted-foreground py-1">{d}</div>
         ))}
         {Array.from({ length: offset }).map((_, i) => <div key={`off-${i}`} />)}
         {days.map(({ day, status }) => (
           <div
             key={day}
-            className={`aspect-square rounded-md flex items-center justify-center text-xs font-mono ${
-              status ? (statusColors[status] || 'bg-muted') : 'bg-muted/30'
-            } ${status === 'P' || status === 'LC' ? 'text-primary-foreground' : status === 'A' ? 'text-destructive-foreground' : 'text-foreground'}`}
+            className={`aspect-square rounded-md flex items-center justify-center text-xs font-medium ${
+              status ? (statusColors[status] || 'bg-muted text-muted-foreground') : 'bg-muted/30 text-foreground'
+            }`}
           >
             {day}
           </div>

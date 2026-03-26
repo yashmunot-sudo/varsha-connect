@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      advance_requests: {
+        Row: {
+          amount_requested: number
+          applied_at: string
+          employee_id: string
+          id: string
+          reason: string | null
+          repayment_months: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          amount_requested: number
+          applied_at?: string
+          employee_id: string
+          id?: string
+          reason?: string | null
+          repayment_months?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          amount_requested?: number
+          applied_at?: string
+          employee_id?: string
+          id?: string
+          reason?: string | null
+          repayment_months?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advance_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advance_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance: {
         Row: {
           attendance_date: string
@@ -243,6 +294,60 @@ export type Database = {
           },
         ]
       }
+      leave_requests: {
+        Row: {
+          applied_at: string
+          employee_id: string
+          from_date: string
+          id: string
+          leave_type: string
+          reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          to_date: string
+        }
+        Insert: {
+          applied_at?: string
+          employee_id: string
+          from_date: string
+          id?: string
+          leave_type: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          to_date: string
+        }
+        Update: {
+          applied_at?: string
+          employee_id?: string
+          from_date?: string
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          to_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_scores: {
         Row: {
           attendance_score: number | null
@@ -283,6 +388,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "monthly_scores_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_advances: {
+        Row: {
+          amount_deducted: number
+          amount_sanctioned: number
+          closing_balance: number
+          created_at: string
+          employee_id: string
+          entered_by: string | null
+          id: string
+          month: string
+          opening_balance: number
+          year: number
+        }
+        Insert: {
+          amount_deducted?: number
+          amount_sanctioned?: number
+          closing_balance?: number
+          created_at?: string
+          employee_id: string
+          entered_by?: string | null
+          id?: string
+          month: string
+          opening_balance?: number
+          year: number
+        }
+        Update: {
+          amount_deducted?: number
+          amount_sanctioned?: number
+          closing_balance?: number
+          created_at?: string
+          employee_id?: string
+          entered_by?: string | null
+          id?: string
+          month?: string
+          opening_balance?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_advances_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
