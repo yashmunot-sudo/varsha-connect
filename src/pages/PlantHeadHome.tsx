@@ -15,10 +15,28 @@ const PlantHeadHome: React.FC = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  const queryClient = useQueryClient();
   const { data: allEmployees } = useAllEmployees();
   const { data: todayAttendance } = useTodayAttendanceAll();
   const { data: allScores } = useAllScores();
   const { data: pendingLeaves } = usePendingLeaveRequests();
+  const { data: pendingAdvances } = usePendingAdvanceRequests();
+
+  const totalPending = (pendingLeaves?.length || 0) + (pendingAdvances?.length || 0);
+
+  const handleApproval = async (table: 'leave_requests' | 'advance_requests', id: string, status: 'Approved' | 'Rejected') => {
+    const { error } = await supabase.from(table).update({
+      status,
+      reviewed_by: user?.employeeId,
+      reviewed_at: new Date().toISOString(),
+    } as any).eq('id', id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(status === 'Approved' ? '✓ Approved' : '✗ Rejected');
+      queryClient.invalidateQueries({ queryKey: ['pending_leave_requests'] });
+      queryClient.invalidateQueries({ queryKey: ['pending_advance_requests'] });
+    }
+  };
 
   const activeCount = allEmployees?.length || 0;
   const presentToday = todayAttendance?.filter(a => a.status === 'P' || a.status === 'LC' || a.status === 'OT').length || 0;
