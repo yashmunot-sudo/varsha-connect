@@ -250,11 +250,18 @@ const WorkerHome: React.FC = () => {
     <div className="min-h-screen bg-background pb-20">
       <TopBar />
       <div className="px-4 py-4 space-y-4">
+        {/* Greeting */}
+        <div>
+          <div className="text-xs text-primary font-semibold tracking-[0.15em] uppercase mb-1">
+            {(() => { const h = new Date().getHours(); return h < 12 ? (lang === 'hi' ? 'सुप्रभात' : 'Good Morning') : h < 17 ? (lang === 'hi' ? 'नमस्ते' : 'Good Afternoon') : (lang === 'hi' ? 'शुभ संध्या' : 'Good Evening'); })()}, {user?.nameHi || user?.name?.split(' ')[0]}
+          </div>
+        </div>
+
         {/* Today's shift info */}
-        <div className="bg-card rounded-xl border border-border card-shadow p-4">
+        <div className="bg-gradient-to-r from-primary/8 to-info/5 rounded-2xl border border-primary/15 p-4">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-primary" />
-            <span className="text-[10px] text-primary tracking-[0.2em] uppercase font-semibold">
+            <span className="text-[10px] text-primary tracking-[0.15em] uppercase font-semibold">
               {lang === 'hi' ? 'आज की शिफ्ट' : "TODAY'S SHIFT"}
             </span>
           </div>
