@@ -27,7 +27,7 @@ const WorkerHome: React.FC = () => {
   const [showAdvanceForm, setShowAdvanceForm] = useState(false);
   const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
-  const [moreSubTab, setMoreSubTab] = useState<'menu' | 'profile' | 'notifications' | 'settings'>('menu');
+  
 
   const { data: attendanceRecords } = useMyAttendance(user?.employeeId);
   const { data: leaveBalance } = useMyLeaveBalance(user?.employeeId);
