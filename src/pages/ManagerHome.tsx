@@ -195,6 +195,10 @@ const ManagerHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'more') {
+    return <MoreMenu role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
+  }
+
   // Home
   const greeting = () => {
     const h = new Date().getHours();

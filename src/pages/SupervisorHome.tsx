@@ -153,6 +153,10 @@ const SupervisorHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'more') {
+    return <MoreMenu role="supervisor" activeTab={activeTab} onTabChange={setActiveTab} />;
+  }
+
   if (activeTab === 'report') {
     return (
       <div className="min-h-screen bg-background pb-20">

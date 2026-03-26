@@ -135,15 +135,7 @@ const SecurityGuardHome: React.FC = () => {
   }
 
   if (activeTab === 'more') {
-    return (
-      <div className="min-h-screen bg-background pb-20">
-        <TopBar />
-        <div className="px-4 py-4">
-          <SettingsScreen />
-        </div>
-        <BottomNav role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
-    );
+    return <MoreMenu role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />;
   }
 
   // Home

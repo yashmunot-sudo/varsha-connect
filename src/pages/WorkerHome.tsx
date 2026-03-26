@@ -416,6 +416,9 @@ const WorkerHome: React.FC = () => {
           )}
         </div>
 
+        {/* Safety Tip */}
+        <SafetyTips lang={lang} />
+
         {/* EoTM rank */}
         <div className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center gap-3">
           <Award className="w-7 h-7 text-warning" />

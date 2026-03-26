@@ -220,7 +220,7 @@ const PlantHeadHome: React.FC = () => {
           </p>
         </div>
       </div>
-      <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
     </div>
   );
 };

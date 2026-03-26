@@ -108,6 +108,10 @@ const OwnerHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'more') {
+    return <MoreMenu role="owner" activeTab={activeTab} onTabChange={setActiveTab} />;
+  }
+
   // Home — Owner Morning Dashboard
   return (
     <div className="min-h-screen bg-background pb-20">
