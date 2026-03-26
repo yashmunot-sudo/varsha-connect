@@ -197,6 +197,26 @@ const ManagerHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'mrm') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <MRMReviewTab />
+        <BottomNav role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'purchase') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <PurchaseRequisitionTab />
+        <BottomNav role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
   if (activeTab === 'more') {
     return <MoreMenu role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
   }
