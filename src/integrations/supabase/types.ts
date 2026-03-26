@@ -637,7 +637,14 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "worker" | "supervisor" | "manager" | "hr_admin" | "owner"
+      app_role:
+        | "worker"
+        | "supervisor"
+        | "manager"
+        | "hr_admin"
+        | "owner"
+        | "plant_head"
+        | "security_guard"
       attendance_status:
         | "P"
         | "H"
@@ -777,7 +784,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["worker", "supervisor", "manager", "hr_admin", "owner"],
+      app_role: [
+        "worker",
+        "supervisor",
+        "manager",
+        "hr_admin",
+        "owner",
+        "plant_head",
+        "security_guard",
+      ],
       attendance_status: ["P", "H", "LC", "EC", "OT", "A", "L", "WO", "HO"],
       employee_category: ["WORKER", "STAFF", "CONSULTANT"],
       shift_type: ["general", "first", "second", "third", "day", "night"],
