@@ -47,6 +47,8 @@ const LoginPage: React.FC = () => {
     manager: 'from-info/15 to-info/5 border-info/20',
     hr_admin: 'from-success/15 to-success/5 border-success/20',
     owner: 'from-primary/20 to-warning/10 border-primary/20',
+    plant_head: 'from-info/20 to-primary/10 border-info/20',
+    security_guard: 'from-muted/15 to-muted/5 border-muted/20',
   };
 
   const roleIconBg: Record<UserRole, string> = {
@@ -55,6 +57,8 @@ const LoginPage: React.FC = () => {
     manager: 'bg-info/15',
     hr_admin: 'bg-success/15',
     owner: 'bg-primary/15',
+    plant_head: 'bg-info/15',
+    security_guard: 'bg-muted/15',
   };
 
   return (

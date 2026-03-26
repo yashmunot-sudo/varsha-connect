@@ -41,6 +41,8 @@ const DEMO_PHONES: Record<UserRole, string> = {
   manager: '+919876543212',
   hr_admin: '+919876543213',
   owner: '+919876543214',
+  plant_head: '+919823395533',
+  security_guard: '+919876543215',
 };
 
 async function fetchEmployeeByPhone(phone: string): Promise<AuthUser | null> {

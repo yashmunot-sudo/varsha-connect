@@ -57,7 +57,7 @@ export const EMPLOYEE_CATEGORIES = {
 } as const;
 
 // User roles
-export type UserRole = 'worker' | 'supervisor' | 'manager' | 'hr_admin' | 'owner';
+export type UserRole = 'worker' | 'supervisor' | 'manager' | 'hr_admin' | 'owner' | 'plant_head' | 'security_guard';
 
 export const USER_ROLES: Record<UserRole, { label_en: string; label_hi: string; icon: string }> = {
   worker: { label_en: 'Worker', label_hi: 'कर्मचारी', icon: '👷' },
@@ -65,4 +65,6 @@ export const USER_ROLES: Record<UserRole, { label_en: string; label_hi: string; 
   manager: { label_en: 'Manager', label_hi: 'मैनेजर', icon: '💼' },
   hr_admin: { label_en: 'HR Admin', label_hi: 'HR एडमिन', icon: '📋' },
   owner: { label_en: 'Owner', label_hi: 'मालिक', icon: '🏭' },
+  plant_head: { label_en: 'Plant Head', label_hi: 'प्लांट हेड', icon: '🏗️' },
+  security_guard: { label_en: 'Security', label_hi: 'सुरक्षा', icon: '🛡️' },
 };

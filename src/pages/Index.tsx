@@ -6,6 +6,7 @@ import SupervisorHome from './SupervisorHome';
 import ManagerHome from './ManagerHome';
 import HRAdminHome from './HRAdminHome';
 import OwnerHome from './OwnerHome';
+import PlantHeadHome from './PlantHeadHome';
 import vflLogo from '@/assets/vfl-logo.jpeg';
 
 const Index: React.FC = () => {
@@ -44,6 +45,8 @@ const Index: React.FC = () => {
       return <HRAdminHome />;
     case 'owner':
       return <OwnerHome />;
+    case 'plant_head':
+      return <PlantHeadHome />;
     default:
       return <WorkerHome />;
   }
