@@ -45,6 +45,18 @@ const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; labe
     { id: 'people', icon: Users, label_hi: 'लोग', label_en: 'People' },
     { id: 'more', icon: Menu, label_hi: 'और', label_en: 'More' },
   ],
+  plant_head: [
+    { id: 'home', icon: Home, label_hi: 'होम', label_en: 'Home' },
+    { id: 'departments', icon: Users, label_hi: 'विभाग', label_en: 'Depts' },
+    { id: 'tasks', icon: ClipboardList, label_hi: 'कार्य', label_en: 'Tasks' },
+    { id: 'approvals', icon: FileText, label_hi: 'स्वीकृति', label_en: 'Approvals' },
+    { id: 'more', icon: Menu, label_hi: 'और', label_en: 'More' },
+  ],
+  security_guard: [
+    { id: 'home', icon: Home, label_hi: 'होम', label_en: 'Home' },
+    { id: 'vehicles', icon: ClipboardList, label_hi: 'वाहन', label_en: 'Vehicles' },
+    { id: 'more', icon: Menu, label_hi: 'और', label_en: 'More' },
+  ],
 };
 
 const BottomNav: React.FC<BottomNavProps> = ({ role, activeTab, onTabChange, badges = {} }) => {
