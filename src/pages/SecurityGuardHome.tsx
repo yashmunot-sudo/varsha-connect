@@ -123,7 +123,7 @@ const SecurityGuardHome: React.FC = () => {
                     <div className="text-[10px] text-muted-foreground">{v.purpose} · {v.driver_name || '-'}</div>
                   </div>
                   <div className="text-[10px] text-muted-foreground">
-                    {v.entry_time ? new Date(v.entry_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                    {v.time_in ? new Date(v.time_in).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '-'}
                   </div>
                 </div>
               ))}
