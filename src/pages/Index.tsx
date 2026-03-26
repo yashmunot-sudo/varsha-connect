@@ -8,6 +8,7 @@ import HRAdminHome from './HRAdminHome';
 import OwnerHome from './OwnerHome';
 import PlantHeadHome from './PlantHeadHome';
 import SecurityGuardHome from './SecurityGuardHome';
+import MissingDataBanner from '@/components/MissingDataBanner';
 import vflLogo from '@/assets/vfl-logo.jpeg';
 
 const Index: React.FC = () => {
@@ -35,24 +36,25 @@ const Index: React.FC = () => {
     return <LoginPage />;
   }
 
-  switch (user.role) {
-    case 'worker':
-      return <WorkerHome />;
-    case 'supervisor':
-      return <SupervisorHome />;
-    case 'manager':
-      return <ManagerHome />;
-    case 'hr_admin':
-      return <HRAdminHome />;
-    case 'owner':
-      return <OwnerHome />;
-    case 'plant_head':
-      return <PlantHeadHome />;
-    case 'security_guard':
-      return <SecurityGuardHome />;
-    default:
-      return <WorkerHome />;
-  }
+  const renderHome = () => {
+    switch (user.role) {
+      case 'worker': return <WorkerHome />;
+      case 'supervisor': return <SupervisorHome />;
+      case 'manager': return <ManagerHome />;
+      case 'hr_admin': return <HRAdminHome />;
+      case 'owner': return <OwnerHome />;
+      case 'plant_head': return <PlantHeadHome />;
+      case 'security_guard': return <SecurityGuardHome />;
+      default: return <WorkerHome />;
+    }
+  };
+
+  return (
+    <>
+      <MissingDataBanner />
+      {renderHome()}
+    </>
+  );
 };
 
 export default Index;
