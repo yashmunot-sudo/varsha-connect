@@ -274,6 +274,8 @@ const ManagerHome: React.FC = () => {
             { tab: 'attendance', icon: BarChart3, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'विभाग उपस्थिति' : 'Dept. Attendance' },
             { tab: 'approvals', icon: FileCheck, color: 'bg-warning/10', iconColor: 'text-warning', label: lang === 'hi' ? 'स्वीकृतियाँ' : 'Approvals', badge: totalPending },
             { tab: 'kpi', icon: TrendingUp, color: 'bg-primary/10', iconColor: 'text-primary', label: 'KPI' },
+            { tab: 'mrm', icon: ClipboardList, color: 'bg-success/10', iconColor: 'text-success', label: lang === 'hi' ? 'समीक्षा / MRM' : 'MRM Review' },
+            { tab: 'purchase', icon: ShoppingCart, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'खरीद' : 'Purchase' },
           ].map(item => (
             <button key={item.tab} onClick={() => setActiveTab(item.tab)} className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-shadow hover:bg-muted/50 transition-all active:scale-[0.98]">
               <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center`}>

@@ -328,9 +328,10 @@ const SupervisorHome: React.FC = () => {
         {/* Quick actions */}
         <div className="space-y-2">
           {[
-            { tab: 'team', icon: Users, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'टीम देखें' : 'View Team' },
+          { tab: 'team', icon: Users, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'टीम देखें' : 'View Team' },
             { tab: 'casual', icon: Plus, color: 'bg-primary/10', iconColor: 'text-primary', label: lang === 'hi' ? 'कैज़ुअल वर्कर लॉग' : 'Log Casual Workers' },
             { tab: 'report', icon: FileText, color: 'bg-warning/10', iconColor: 'text-warning', label: lang === 'hi' ? 'शिफ्ट रिपोर्ट' : 'Shift Report' },
+            { tab: 'purchase', icon: ShoppingCart, color: 'bg-success/10', iconColor: 'text-success', label: lang === 'hi' ? 'खरीद' : 'Purchase Requisition' },
           ].map(item => (
             <button key={item.tab} onClick={() => setActiveTab(item.tab)} className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border bg-card card-shadow hover:bg-muted/50 transition-all active:scale-[0.98]">
               <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center`}>
