@@ -22,6 +22,7 @@ const WorkerHome: React.FC = () => {
   const [locationError, setLocationError] = useState('');
   const [showLeaveForm, setShowLeaveForm] = useState(false);
   const [showAdvanceForm, setShowAdvanceForm] = useState(false);
+  const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
 
   const { data: attendanceRecords } = useMyAttendance(user?.employeeId);
   const { data: leaveBalance } = useMyLeaveBalance(user?.employeeId);
