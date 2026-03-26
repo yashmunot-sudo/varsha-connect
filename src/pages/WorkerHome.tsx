@@ -129,9 +129,9 @@ const WorkerHome: React.FC = () => {
           </h2>
           <AttendanceCalendar lang={lang} records={attendanceRecords || []} />
           <div className="grid grid-cols-3 gap-2">
-            <StatCard label={lang === 'hi' ? 'उपस्थित' : 'Present'} value={String(presentCount)} color="text-success" />
-            <StatCard label={lang === 'hi' ? 'अनुपस्थित' : 'Absent'} value={String(absentCount)} color="text-danger" />
-            <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value={String(lateCount)} color="text-warning" />
+            <StatCard label={lang === 'hi' ? 'उपस्थित' : 'Present'} value={String(presentCount)} color="text-success" bg="bg-success/10" />
+            <StatCard label={lang === 'hi' ? 'अनुपस्थित' : 'Absent'} value={String(absentCount)} color="text-danger" bg="bg-danger/10" />
+            <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value={String(lateCount)} color="text-warning" bg="bg-warning/10" />
           </div>
         </div>
         <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
