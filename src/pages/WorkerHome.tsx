@@ -381,6 +381,38 @@ const WorkerHome: React.FC = () => {
           </button>
         </div>
 
+        {/* Maintenance Observation Card */}
+        <div className="bg-card rounded-xl border border-border card-shadow p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Wrench className="w-5 h-5 text-primary" />
+            <div className="text-xs font-semibold text-foreground">
+              {lang === 'hi' ? 'रखरखाव अवलोकन' : 'Preventive Maintenance'}
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            {lang === 'hi'
+              ? 'क्या आपने आज कोई रखरखाव समस्या देखी? रिपोर्ट करें और 15 अंक कमाएं'
+              : 'Did you notice something that needs maintenance today? Report it and earn 15 points toward Employee of the Month'}
+          </p>
+          {todayObsCount >= 3 ? (
+            <div className="text-center text-xs text-warning font-semibold py-2">
+              {lang === 'hi' ? 'आज की सीमा पूरी — कल वापस आएं' : "Today's limit reached — come back tomorrow"}
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowMaintenanceForm(true)}
+              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target"
+            >
+              {lang === 'hi' ? 'रखरखाव रिपोर्ट करें / Report Maintenance' : 'Report Maintenance / रखरखाव रिपोर्ट करें'}
+            </button>
+          )}
+          {todayObsCount > 0 && (
+            <div className="text-xs text-success mt-2 text-center font-semibold">
+              {lang === 'hi' ? `आज ${todayObsCount} रिपोर्ट · ${todayObsCount * 15} अंक अर्जित` : `${todayObsCount} report(s) today · ${todayObsCount * 15} points earned`}
+            </div>
+          )}
+        </div>
+
         {/* EoTM rank */}
         <div className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center gap-3">
           <Award className="w-7 h-7 text-warning" />
@@ -395,6 +427,7 @@ const WorkerHome: React.FC = () => {
 
       {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
       {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
+      {showMaintenanceForm && <MaintenanceObservationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowMaintenanceForm(false)} />}
     </div>
   );
 };
