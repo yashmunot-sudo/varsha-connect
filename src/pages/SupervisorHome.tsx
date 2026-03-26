@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { Users, Plus, FileText, ChevronRight, UserCheck, Clock } from 'lucide-react';
+import MoreMenu from '@/components/MoreMenu';
 import { useTeamAttendance, useTodayCasualWorkers } from '@/hooks/useEmployeeData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
