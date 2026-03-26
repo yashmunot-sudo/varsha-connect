@@ -232,56 +232,7 @@ const WorkerHome: React.FC = () => {
   }
 
   if (activeTab === 'more') {
-    if (moreSubTab === 'profile') {
-      return (
-        <div className="min-h-screen bg-background pb-20">
-          <TopBar />
-          <div className="px-4 py-4">
-            <button onClick={() => setMoreSubTab('menu')} className="text-sm text-primary font-medium mb-3">← {lang === 'hi' ? 'वापस' : 'Back'}</button>
-            <ProfileScreen lang={lang} />
-          </div>
-          <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      );
-    }
-    if (moreSubTab === 'notifications') {
-      return (
-        <div className="min-h-screen bg-background pb-20">
-          <TopBar />
-          <div className="px-4 py-4">
-            <button onClick={() => setMoreSubTab('menu')} className="text-sm text-primary font-medium mb-3">← {lang === 'hi' ? 'वापस' : 'Back'}</button>
-            <NotificationsPanel lang={lang} employeeId={user?.employeeId} />
-          </div>
-          <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      );
-    }
-    if (moreSubTab === 'settings') {
-      return (
-        <div className="min-h-screen bg-background pb-20">
-          <TopBar />
-          <div className="px-4 py-4">
-            <button onClick={() => setMoreSubTab('menu')} className="text-sm text-primary font-medium mb-3">← {lang === 'hi' ? 'वापस' : 'Back'}</button>
-            <SettingsScreen />
-          </div>
-          <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      );
-    }
-    return (
-      <div className="min-h-screen bg-background pb-20">
-        <TopBar />
-        <div className="px-4 py-4 space-y-3">
-          <h2 className="font-display text-lg font-bold text-foreground mb-4">{lang === 'hi' ? 'और विकल्प' : 'More Options'}</h2>
-          <button onClick={() => setMoreSubTab('profile')} className="w-full"><QuickAction icon={User} label={lang === 'hi' ? 'मेरी प्रोफ़ाइल' : 'My Profile'} sub={lang === 'hi' ? 'व्यक्तिगत जानकारी' : 'Personal info'} /></button>
-          <button onClick={() => setMoreSubTab('notifications')} className="w-full"><QuickAction icon={FileText} label={lang === 'hi' ? 'सूचनाएं' : 'Notifications'} sub={lang === 'hi' ? 'अपडेट देखें' : 'View updates'} /></button>
-          <QuickAction icon={Star} label={lang === 'hi' ? 'EoTM लीडरबोर्ड' : 'EoTM Leaderboard'} sub={lang === 'hi' ? 'रैंकिंग देखें' : 'View rankings'} />
-          <QuickAction icon={Banknote} label={lang === 'hi' ? 'मेरा वेतन' : 'My Pay'} sub={lang === 'hi' ? 'वेतन अनुमान' : 'Salary estimate'} />
-          <button onClick={() => setMoreSubTab('settings')} className="w-full"><QuickAction icon={Settings} label={lang === 'hi' ? 'सेटिंग्स' : 'Settings'} sub={lang === 'hi' ? 'भाषा, सहायता' : 'Language, help'} /></button>
-        </div>
-        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
-    );
+    return <MoreMenu role="worker" activeTab={activeTab} onTabChange={setActiveTab} />;
   }
 
   // Home tab
