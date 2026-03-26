@@ -29,6 +29,8 @@ const WorkerHome: React.FC = () => {
   const { data: score } = useMyScore(user?.employeeId);
   const { data: todayShift } = useMyShift(user?.employeeId);
   const { data: advanceData } = useMyAdvanceBalance(user?.employeeId);
+  const { data: todayObservations } = useMyTodayObservations(user?.employeeId);
+  const todayObsCount = todayObservations?.length || 0;
 
   const today = new Date().toISOString().split('T')[0];
   const todayAtt = attendanceRecords?.find(a => a.attendance_date === today);
