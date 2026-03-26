@@ -357,7 +357,7 @@ const WorkerHome: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={handleCheckOut}
+              onClick={() => setShowChecklist(true)}
               className="w-full py-6 rounded-xl bg-destructive text-destructive-foreground font-display font-extrabold text-lg transition-all touch-target-xl glow-danger active:scale-95"
             >
               <span className="flex flex-col items-center gap-1">
