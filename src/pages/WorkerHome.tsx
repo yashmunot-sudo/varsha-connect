@@ -145,7 +145,7 @@ const WorkerHome: React.FC = () => {
         <TopBar />
         <div className="px-4 py-4 space-y-4">
           <h2 className="font-display text-lg font-bold text-foreground">{lang === 'hi' ? 'मेरा स्कोर' : 'My Score'}</h2>
-          <div className="bg-card rounded-xl border border-border card-shadow p-6 text-center">
+          <div className="bg-gradient-to-br from-primary/10 to-warning/5 rounded-2xl border border-primary/15 p-6 text-center">
             <div className="font-display text-5xl font-extrabold text-primary mb-2">{compositeScore}</div>
             <div className="text-xs text-muted-foreground tracking-wider uppercase">
               {lang === 'hi' ? 'इस महीने का स्कोर' : 'This Month Score'}
@@ -156,8 +156,10 @@ const WorkerHome: React.FC = () => {
             <ScoreRow label={lang === 'hi' ? 'प्रदर्शन (40%)' : 'Performance (40%)'} value={Math.round(Number(score?.performance_score || 0))} max={100} color="bg-info" />
             <ScoreRow label={lang === 'hi' ? 'अवलोकन (20%)' : 'Observations (20%)'} value={Math.round(Number(score?.observation_score || 0))} max={100} color="bg-primary" />
           </div>
-          <div className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center gap-3">
-            <Award className="w-8 h-8 text-warning" />
+          <div className="bg-gradient-to-r from-warning/10 to-warning/5 rounded-2xl border border-warning/20 p-4 flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-warning/15 flex items-center justify-center">
+              <Award className="w-6 h-6 text-warning" />
+            </div>
             <div>
               <div className="font-display text-sm font-bold text-foreground">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}: #{eotmRank}</div>
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'टॉप 5 में हैं! बढ़िया!' : 'Keep going!'}</div>
