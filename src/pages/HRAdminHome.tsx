@@ -133,6 +133,10 @@ const HRAdminHome: React.FC = () => {
     return <AdvanceEntrySection lang={lang} employees={employees} activeTab={activeTab} setActiveTab={setActiveTab} />;
   }
 
+  if (activeTab === 'maintenance') {
+    return <MaintenanceOverview lang={lang} activeTab={activeTab} setActiveTab={setActiveTab} />;
+  }
+
   // Home
   const attPct = totalEmp > 0 ? Math.round((presentCount / totalEmp) * 100) : 0;
 
