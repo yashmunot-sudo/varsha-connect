@@ -481,6 +481,7 @@ const WorkerHome: React.FC = () => {
       {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
       {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
       {showMaintenanceForm && <MaintenanceObservationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowMaintenanceForm(false)} />}
+      {showChecklist && <DailyChecklist lang={lang} employeeId={user?.employeeId} onComplete={() => { setShowChecklist(false); handleCheckOut(); }} />}
     </div>
   );
 };
