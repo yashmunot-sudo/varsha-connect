@@ -58,6 +58,80 @@ const SupervisorHome: React.FC = () => {
     return lang === 'hi' ? 'शुभ संध्या' : 'Good Evening';
   };
 
+  // Fetch today's checkpoints for team members
+  const { data: teamCheckpoints } = useQuery({
+    queryKey: ['team_checkpoints', user?.department],
+    enabled: !!user?.department,
+    queryFn: async () => {
+      const todayDate = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('attendance_checkpoints')
+        .select('*')
+        .eq('attendance_date', todayDate);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const lastConfirmRef = useRef<number>(0);
+
+  const confirmCheckpoint3 = async (employeeId: string) => {
+    const now = Date.now();
+    if (now - lastConfirmRef.current < 3000) {
+      toast.error(lang === 'hi' ? '3 सेकंड रुकें' : 'Wait 3 seconds between taps');
+      return;
+    }
+    lastConfirmRef.current = now;
+
+    const todayDate = new Date().toISOString().split('T')[0];
+    const cp = teamCheckpoints?.find(c => c.employee_id === employeeId);
+    if (!cp) {
+      toast.error(lang === 'hi' ? 'चेकपॉइंट रिकॉर्ड नहीं मिला' : 'No checkpoint record found');
+      return;
+    }
+
+    const { error } = await supabase.from('attendance_checkpoints').update({
+      checkpoint_3_time: new Date().toISOString(),
+      checkpoint_3_confirmed_by: user?.employeeId,
+      all_confirmed: !!cp.checkpoint_1_time && !!cp.checkpoint_2_time,
+    }).eq('id', cp.id);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    // If all 3 confirmed, set attendance status to P
+    if (cp.checkpoint_1_time && cp.checkpoint_2_time) {
+      await supabase.from('attendance').update({ status: 'P' as any }).eq('employee_id', employeeId).eq('attendance_date', todayDate);
+    }
+
+    toast.success(lang === 'hi' ? '✓ फ्लोर पुष्टि' : '✓ Floor confirmed');
+    queryClient.invalidateQueries({ queryKey: ['team_checkpoints'] });
+    queryClient.invalidateQueries({ queryKey: ['team_attendance'] });
+  };
+
+  const markAbsent = async (employeeId: string) => {
+    const todayDate = new Date().toISOString().split('T')[0];
+    await supabase.from('attendance').upsert({
+      employee_id: employeeId,
+      attendance_date: todayDate,
+      status: 'A' as any,
+    }, { onConflict: 'employee_id,attendance_date' });
+    toast.success(lang === 'hi' ? '✗ अनुपस्थित' : '✗ Marked absent');
+    queryClient.invalidateQueries({ queryKey: ['team_attendance'] });
+  };
+
+  if (activeTab === 'purchase') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <PurchaseRequisitionTab />
+        <BottomNav role="supervisor" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
+  }
+
   if (activeTab === 'team') {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -73,22 +147,49 @@ const SupervisorHome: React.FC = () => {
             const status = m.status || 'A';
             const s = statusConfig[status] || statusConfig['A'];
             const timeStr = m.checkInTime ? new Date(m.checkInTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '-';
+            const cp = teamCheckpoints?.find(c => c.employee_id === m.id);
+            const cp3Done = !!cp?.checkpoint_3_time;
+
             return (
-              <div key={m.id} className="bg-card rounded-2xl border border-border card-shadow p-4 flex items-center gap-3">
-                <div className={`status-dot ${s.dot}`} />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-foreground">{m.name_hi || m.name}</div>
-                  <div className="text-[10px] text-muted-foreground">{m.emp_code}</div>
-                </div>
-                <div className="text-right">
-                  <div className={`text-xs font-bold ${s.color}`}>
-                    {lang === 'hi' ? s.label_hi : s.label_en}
+              <div key={m.id} className="bg-card rounded-2xl border border-border card-shadow p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`status-dot ${s.dot}`} />
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-foreground">{m.name_hi || m.name}</div>
+                    <div className="text-[10px] text-muted-foreground">{m.emp_code}</div>
                   </div>
-                  <div className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
-                    <Clock className="w-2.5 h-2.5" />
-                    {timeStr}
+                  <div className="text-right">
+                    <div className={`text-xs font-bold ${s.color}`}>
+                      {lang === 'hi' ? s.label_hi : s.label_en}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
+                      <Clock className="w-2.5 h-2.5" />
+                      {timeStr}
+                    </div>
                   </div>
                 </div>
+                {/* Checkpoint 3 actions — individual confirm/absent */}
+                {m.status && !cp3Done && (
+                  <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-border/50">
+                    <button
+                      onClick={() => confirmCheckpoint3(m.id)}
+                      className="flex-1 py-2 rounded-xl bg-success text-primary-foreground text-xs font-bold flex items-center justify-center gap-1 active:scale-[0.97] transition-all"
+                    >
+                      <UserCheck className="w-3.5 h-3.5" /> {lang === 'hi' ? 'फ्लोर पुष्टि' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => markAbsent(m.id)}
+                      className="flex-1 py-2 rounded-xl bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center gap-1 active:scale-[0.97] transition-all"
+                    >
+                      <XCircle className="w-3.5 h-3.5" /> {lang === 'hi' ? 'अनुपस्थित' : 'Absent'}
+                    </button>
+                  </div>
+                )}
+                {cp3Done && (
+                  <div className="text-[10px] text-success font-semibold mt-2 flex items-center gap-1">
+                    <UserCheck className="w-3 h-3" /> {lang === 'hi' ? 'फ्लोर पर पुष्टि की गई' : 'Floor confirmed'}
+                  </div>
+                )}
               </div>
             );
           })}
