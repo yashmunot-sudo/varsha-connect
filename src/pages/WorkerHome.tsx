@@ -648,4 +648,131 @@ const AttendanceCalendar: React.FC<{ lang: string; records: any[] }> = ({ lang, 
   );
 };
 
+
+// Maintenance Observation Form Modal
+const MaintenanceObservationForm: React.FC<{ lang: string; employeeId?: string; onClose: () => void }> = ({ lang, employeeId, onClose }) => {
+  const queryClient = useQueryClient();
+  const [machineArea, setMachineArea] = useState('');
+  const [observationText, setObservationText] = useState('');
+  const [reasonText, setReasonText] = useState('');
+  const [urgency, setUrgency] = useState('Can wait');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!employeeId || !machineArea || !observationText || !reasonText) return;
+    setSubmitting(true);
+    let photoUrl: string | null = null;
+
+    if (photoFile) {
+      const ext = photoFile.name.split('.').pop();
+      const path = `${employeeId}/${Date.now()}.${ext}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('maintenance-photos')
+        .upload(path, photoFile);
+      if (!uploadError && uploadData) {
+        const { data: urlData } = supabase.storage.from('maintenance-photos').getPublicUrl(uploadData.path);
+        photoUrl = urlData.publicUrl;
+      }
+    }
+
+    const { error } = await supabase.from('maintenance_observations').insert({
+      employee_id: employeeId,
+      machine_area: machineArea,
+      observation_text: observationText,
+      reason_text: reasonText,
+      photo_url: photoUrl,
+      urgency,
+      points_awarded: 15,
+    } as any);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      // Update monthly observation score
+      const now = new Date();
+      const { data: existingScore } = await supabase
+        .from('monthly_scores')
+        .select('*')
+        .eq('employee_id', employeeId)
+        .eq('month', now.getMonth() + 1)
+        .eq('year', now.getFullYear())
+        .maybeSingle();
+
+      if (existingScore) {
+        await supabase.from('monthly_scores').update({
+          observation_score: Number(existingScore.observation_score || 0) + 15,
+          composite_score: Number(existingScore.composite_score || 0) + (15 * 0.20),
+        }).eq('id', existingScore.id);
+      } else {
+        await supabase.from('monthly_scores').insert({
+          employee_id: employeeId,
+          month: now.getMonth() + 1,
+          year: now.getFullYear(),
+          observation_score: 15,
+          composite_score: 15 * 0.20,
+        } as any);
+      }
+
+      toast.success(
+        lang === 'hi'
+          ? 'शाबाश! आपने 15 अंक कमाए — यह आपके EoTM स्कोर में जुड़ गया'
+          : 'Well done! You earned 15 points — added to your EoTM score'
+      );
+      queryClient.invalidateQueries({ queryKey: ['my_observations_today'] });
+      queryClient.invalidateQueries({ queryKey: ['monthly_score'] });
+      onClose();
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-foreground/50 flex items-end justify-center">
+      <div className="bg-card w-full max-w-lg rounded-t-2xl border-t border-border p-6 space-y-4 animate-slide-up max-h-[85vh] overflow-y-auto">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold text-foreground">
+            {lang === 'hi' ? 'रखरखाव रिपोर्ट' : 'Maintenance Report'}
+          </h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted"><X className="w-5 h-5 text-muted-foreground" /></button>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'मशीन या क्षेत्र' : 'Machine or Area'}</label>
+          <input type="text" value={machineArea} onChange={e => setMachineArea(e.target.value)} placeholder={lang === 'hi' ? 'जैसे: कटिंग मशीन 3' : 'e.g. Cutting Machine 3'} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'आपने क्या देखा?' : 'What did you observe?'}</label>
+          <input type="text" value={observationText} onChange={e => setObservationText(e.target.value)} placeholder={lang === 'hi' ? 'जैसे: असामान्य आवाज, तेल रिसाव' : 'e.g. unusual noise, oil leak'} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'यह ध्यान क्यों देना ज़रूरी है?' : 'Why does this need attention?'}</label>
+          <input type="text" value={reasonText} onChange={e => setReasonText(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'फोटो (वैकल्पिक)' : 'Photo (optional)'}</label>
+          <label className="flex items-center gap-2 w-full rounded-xl border border-dashed border-border bg-background px-4 py-3 text-sm text-muted-foreground cursor-pointer hover:bg-muted transition-colors">
+            <Upload className="w-4 h-4" />
+            {photoFile ? photoFile.name : (lang === 'hi' ? 'फोटो चुनें' : 'Choose photo')}
+            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => setPhotoFile(e.target.files?.[0] || null)} />
+          </label>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'तात्कालिकता' : 'Urgency'}</label>
+          <select value={urgency} onChange={e => setUrgency(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+            <option value="Can wait">{lang === 'hi' ? 'इंतज़ार कर सकते हैं' : 'Can wait'}</option>
+            <option value="Needs attention soon">{lang === 'hi' ? 'जल्द ध्यान चाहिए' : 'Needs attention soon'}</option>
+            <option value="Urgent">{lang === 'hi' ? 'तुरंत' : 'Urgent'}</option>
+          </select>
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={submitting || !machineArea || !observationText || !reasonText}
+          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base touch-target disabled:opacity-50"
+        >
+          {submitting ? '...' : (lang === 'hi' ? 'रिपोर्ट भेजें' : 'Submit Report')}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default WorkerHome;
