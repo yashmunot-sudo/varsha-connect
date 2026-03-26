@@ -5,27 +5,68 @@ import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { MapPin, Clock, Camera, Star, Calendar, Award, FileText, Banknote, ChevronRight, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { getCurrentPosition, isInsideGeofence } from '@/lib/geofence';
+import { useMyAttendance, useMyLeaveBalance, useMyScore, useMyShift } from '@/hooks/useEmployeeData';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { SHIFTS } from '@/lib/constants';
 
 const WorkerHome: React.FC = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('home');
-  const [checkedIn, setCheckedIn] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
   const [locationError, setLocationError] = useState('');
-  const [checkInTime, setCheckInTime] = useState('');
+
+  const { data: attendanceRecords } = useMyAttendance(user?.employeeId);
+  const { data: leaveBalance } = useMyLeaveBalance(user?.employeeId);
+  const { data: score } = useMyScore(user?.employeeId);
+  const { data: todayShift } = useMyShift(user?.employeeId);
+
+  // Check if already checked in today
+  const today = new Date().toISOString().split('T')[0];
+  const todayAtt = attendanceRecords?.find(a => a.attendance_date === today);
+  const checkedIn = todayAtt?.check_in_time && !todayAtt?.check_out_time;
+  const checkedOut = todayAtt?.check_out_time;
+
+  const shiftInfo = todayShift?.shift_type
+    ? SHIFTS[todayShift.shift_type.toUpperCase() as keyof typeof SHIFTS]
+    : null;
 
   const handleCheckIn = async () => {
+    if (!user?.employeeId) return;
     setCheckingIn(true);
     setLocationError('');
     try {
       const position = await getCurrentPosition();
-      const inside = isInsideGeofence(position.coords.latitude, position.coords.longitude);
-      if (inside) {
-        setCheckedIn(true);
-        setCheckInTime(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }));
-      } else {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const inside = isInsideGeofence(lat, lng);
+
+      if (!inside) {
         setLocationError(lang === 'hi' ? '✗ आप प्लांट से बाहर हैं' : '✗ You are outside the plant area');
+        setCheckingIn(false);
+        return;
+      }
+
+      const { error } = await supabase.from('attendance').upsert({
+        employee_id: user.employeeId,
+        attendance_date: today,
+        check_in_time: new Date().toISOString(),
+        check_in_lat: lat,
+        check_in_lng: lng,
+        is_inside_geofence: inside,
+        shift_type: todayShift?.shift_type || 'general',
+        status: 'P' as any,
+        points_earned: 10,
+      }, { onConflict: 'employee_id,attendance_date' });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success(lang === 'hi' ? '✓ उपस्थित दर्ज हुई' : '✓ Attendance recorded');
+        queryClient.invalidateQueries({ queryKey: ['attendance'] });
       }
     } catch (err) {
       setLocationError(lang === 'hi' ? 'कृपया स्थान सेवाएं चालू करें' : 'Please enable location services');
@@ -33,16 +74,42 @@ const WorkerHome: React.FC = () => {
     setCheckingIn(false);
   };
 
-  const handleCheckOut = () => {
-    setCheckedIn(false);
-    setCheckInTime('');
+  const handleCheckOut = async () => {
+    if (!user?.employeeId) return;
+    try {
+      const position = await getCurrentPosition();
+      const { error } = await supabase.from('attendance').update({
+        check_out_time: new Date().toISOString(),
+        check_out_lat: position.coords.latitude,
+        check_out_lng: position.coords.longitude,
+      }).eq('employee_id', user.employeeId).eq('attendance_date', today);
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success(lang === 'hi' ? '✓ चेक-आउट हो गया' : '✓ Checked out');
+        queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      }
+    } catch {
+      // Check out without GPS if location fails
+      await supabase.from('attendance').update({
+        check_out_time: new Date().toISOString(),
+      }).eq('employee_id', user.employeeId).eq('attendance_date', today);
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+    }
   };
 
-  // Mock data
-  const leaveBalance = { el: 12, cl: 5, sl: 7 };
-  const score = 85;
-  const eotmRank = 3;
-  const attendancePct = 96;
+  const el = leaveBalance ? Number(leaveBalance.earned_leave) - Number(leaveBalance.el_used) : 0;
+  const cl = leaveBalance ? Number(leaveBalance.casual_leave) - Number(leaveBalance.cl_used) : 0;
+  const sl = leaveBalance ? Number(leaveBalance.sick_leave) - Number(leaveBalance.sl_used) : 0;
+  const compositeScore = score ? Math.round(Number(score.composite_score)) : 0;
+  const eotmRank = score?.eotm_rank || '-';
+
+  const presentCount = attendanceRecords?.filter(a => a.status === 'P' || a.status === 'LC').length || 0;
+  const absentCount = attendanceRecords?.filter(a => a.status === 'A').length || 0;
+  const lateCount = attendanceRecords?.filter(a => a.status === 'LC').length || 0;
+  const totalDays = attendanceRecords?.length || 1;
+  const attendancePct = Math.round((presentCount / Math.max(totalDays, 1)) * 100);
 
   if (activeTab === 'attendance') {
     return (
@@ -52,11 +119,11 @@ const WorkerHome: React.FC = () => {
           <h2 className="font-display text-lg font-bold">
             {lang === 'hi' ? 'उपस्थिति कैलेंडर' : 'Attendance Calendar'}
           </h2>
-          <AttendanceCalendar lang={lang} />
+          <AttendanceCalendar lang={lang} records={attendanceRecords || []} />
           <div className="grid grid-cols-3 gap-2">
-            <StatCard label={lang === 'hi' ? 'उपस्थित' : 'Present'} value="24" color="text-success" />
-            <StatCard label={lang === 'hi' ? 'अनुपस्थित' : 'Absent'} value="1" color="text-danger" />
-            <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value="2" color="text-warning" />
+            <StatCard label={lang === 'hi' ? 'उपस्थित' : 'Present'} value={String(presentCount)} color="text-success" />
+            <StatCard label={lang === 'hi' ? 'अनुपस्थित' : 'Absent'} value={String(absentCount)} color="text-danger" />
+            <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value={String(lateCount)} color="text-warning" />
           </div>
         </div>
         <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
@@ -69,29 +136,23 @@ const WorkerHome: React.FC = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
         <div className="px-4 py-4 space-y-4">
-          <h2 className="font-display text-lg font-bold">
-            {lang === 'hi' ? 'मेरा स्कोर' : 'My Score'}
-          </h2>
+          <h2 className="font-display text-lg font-bold">{lang === 'hi' ? 'मेरा स्कोर' : 'My Score'}</h2>
           <div className="bg-card rounded-xl border border-border p-6 text-center">
-            <div className="font-display text-5xl font-extrabold text-primary mb-2">{score}</div>
+            <div className="font-display text-5xl font-extrabold text-primary mb-2">{compositeScore}</div>
             <div className="font-mono text-xs text-muted-foreground tracking-wider uppercase">
               {lang === 'hi' ? 'इस महीने का स्कोर' : 'This Month Score'}
             </div>
           </div>
           <div className="space-y-3">
-            <ScoreRow label={lang === 'hi' ? 'उपस्थिति (40%)' : 'Attendance (40%)'} value={92} max={100} color="bg-success" />
-            <ScoreRow label={lang === 'hi' ? 'प्रदर्शन (40%)' : 'Performance (40%)'} value={78} max={100} color="bg-info" />
-            <ScoreRow label={lang === 'hi' ? 'अवलोकन (20%)' : 'Observations (20%)'} value={85} max={100} color="bg-primary" />
+            <ScoreRow label={lang === 'hi' ? 'उपस्थिति (40%)' : 'Attendance (40%)'} value={Math.round(Number(score?.attendance_score || 0))} max={100} color="bg-success" />
+            <ScoreRow label={lang === 'hi' ? 'प्रदर्शन (40%)' : 'Performance (40%)'} value={Math.round(Number(score?.performance_score || 0))} max={100} color="bg-info" />
+            <ScoreRow label={lang === 'hi' ? 'अवलोकन (20%)' : 'Observations (20%)'} value={Math.round(Number(score?.observation_score || 0))} max={100} color="bg-primary" />
           </div>
           <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
             <Award className="w-8 h-8 text-warning" />
             <div>
-              <div className="font-display text-sm font-bold">
-                EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}: #{eotmRank}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {lang === 'hi' ? 'टॉप 5 में हैं! बढ़िया!' : 'In Top 5! Great work!'}
-              </div>
+              <div className="font-display text-sm font-bold">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}: #{eotmRank}</div>
+              <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'टॉप 5 में हैं! बढ़िया!' : 'Keep going!'}</div>
             </div>
           </div>
         </div>
@@ -105,24 +166,14 @@ const WorkerHome: React.FC = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
         <div className="px-4 py-4 space-y-4">
-          <h2 className="font-display text-lg font-bold">
-            {lang === 'hi' ? 'छुट्टी शेष' : 'Leave Balance'}
-          </h2>
+          <h2 className="font-display text-lg font-bold">{lang === 'hi' ? 'छुट्टी शेष' : 'Leave Balance'}</h2>
           <div className="grid grid-cols-3 gap-3">
-            <LeaveCard type={lang === 'hi' ? 'अर्जित' : 'EL'} balance={leaveBalance.el} total={20} color="bg-info" />
-            <LeaveCard type={lang === 'hi' ? 'आकस्मिक' : 'CL'} balance={leaveBalance.cl} total={7} color="bg-warning" />
-            <LeaveCard type={lang === 'hi' ? 'बीमारी' : 'SL'} balance={leaveBalance.sl} total={7} color="bg-danger" />
+            <LeaveCard type={lang === 'hi' ? 'अर्जित' : 'EL'} balance={el} total={20} color="bg-info" />
+            <LeaveCard type={lang === 'hi' ? 'आकस्मिक' : 'CL'} balance={cl} total={7} color="bg-warning" />
+            <LeaveCard type={lang === 'hi' ? 'बीमारी' : 'SL'} balance={sl} total={7} color="bg-danger" />
           </div>
-          <QuickAction
-            icon={FileText}
-            label={lang === 'hi' ? 'छुट्टी के लिए आवेदन' : 'Apply Leave'}
-            sub={lang === 'hi' ? 'Google Form खुलेगा' : 'Opens Google Form'}
-          />
-          <QuickAction
-            icon={Banknote}
-            label={lang === 'hi' ? 'अग्रिम के लिए आवेदन' : 'Apply Advance'}
-            sub={lang === 'hi' ? 'Google Form खुलेगा' : 'Opens Google Form'}
-          />
+          <QuickAction icon={FileText} label={lang === 'hi' ? 'छुट्टी के लिए आवेदन' : 'Apply Leave'} sub={lang === 'hi' ? 'Google Form खुलेगा' : 'Opens Google Form'} />
+          <QuickAction icon={Banknote} label={lang === 'hi' ? 'अग्रिम के लिए आवेदन' : 'Apply Advance'} sub={lang === 'hi' ? 'Google Form खुलेगा' : 'Opens Google Form'} />
         </div>
         <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
@@ -134,9 +185,7 @@ const WorkerHome: React.FC = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
         <div className="px-4 py-4 space-y-3">
-          <h2 className="font-display text-lg font-bold mb-4">
-            {lang === 'hi' ? 'और विकल्प' : 'More Options'}
-          </h2>
+          <h2 className="font-display text-lg font-bold mb-4">{lang === 'hi' ? 'और विकल्प' : 'More Options'}</h2>
           <QuickAction icon={Star} label={lang === 'hi' ? 'EoTM लीडरबोर्ड' : 'EoTM Leaderboard'} sub={lang === 'hi' ? 'रैंकिंग देखें' : 'View rankings'} />
           <QuickAction icon={Banknote} label={lang === 'hi' ? 'मेरा वेतन' : 'My Pay'} sub={lang === 'hi' ? 'वेतन अनुमान' : 'Salary estimate'} />
           <QuickAction icon={Camera} label={lang === 'hi' ? 'रखरखाव अवलोकन' : 'Maintenance Obs.'} sub={lang === 'hi' ? '+15 अंक' : '+15 points'} />
@@ -147,6 +196,10 @@ const WorkerHome: React.FC = () => {
   }
 
   // Home tab
+  const checkInTimeStr = todayAtt?.check_in_time
+    ? new Date(todayAtt.check_in_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    : '';
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar />
@@ -160,12 +213,19 @@ const WorkerHome: React.FC = () => {
             </span>
           </div>
           <div className="font-display text-lg font-bold">
-            {lang === 'hi' ? 'पहली शिफ्ट' : 'First Shift'} · 07:00 – 15:30
+            {shiftInfo
+              ? `${lang === 'hi' ? shiftInfo.label_hi : shiftInfo.label_en} · ${shiftInfo.start} – ${shiftInfo.end}`
+              : (lang === 'hi' ? 'कोई शिफ्ट निर्धारित नहीं' : 'No shift assigned')}
           </div>
         </div>
 
         {/* Check-in / Check-out button */}
-        {!checkedIn ? (
+        {checkedOut ? (
+          <div className="bg-muted/50 border border-border rounded-xl p-4 text-center">
+            <CheckCircle2 className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+            <div className="text-sm text-muted-foreground">{lang === 'hi' ? 'आज का दिन पूरा' : "Today's shift complete"}</div>
+          </div>
+        ) : !checkedIn ? (
           <button
             onClick={handleCheckIn}
             disabled={checkingIn}
@@ -195,7 +255,7 @@ const WorkerHome: React.FC = () => {
                   {lang === 'hi' ? '✓ उपस्थित' : '✓ Present'}
                 </div>
                 <div className="font-mono text-xs text-muted-foreground">
-                  {lang === 'hi' ? `चेक-इन: ${checkInTime}` : `Checked in: ${checkInTime}`}
+                  {lang === 'hi' ? `चेक-इन: ${checkInTimeStr}` : `Checked in: ${checkInTimeStr}`}
                 </div>
               </div>
             </div>
@@ -232,7 +292,7 @@ const WorkerHome: React.FC = () => {
             <div className="font-mono text-[10px] text-muted-foreground tracking-wider uppercase mb-1">
               {lang === 'hi' ? 'स्कोर' : 'Score'}
             </div>
-            <div className="font-display text-2xl font-extrabold text-primary">{score}</div>
+            <div className="font-display text-2xl font-extrabold text-primary">{compositeScore}</div>
           </div>
         </div>
 
@@ -243,15 +303,15 @@ const WorkerHome: React.FC = () => {
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="font-display text-xl font-bold text-info">{leaveBalance.el}</div>
+              <div className="font-display text-xl font-bold text-info">{el}</div>
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'अर्जित' : 'EL'}</div>
             </div>
             <div>
-              <div className="font-display text-xl font-bold text-warning">{leaveBalance.cl}</div>
+              <div className="font-display text-xl font-bold text-warning">{cl}</div>
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'आकस्मिक' : 'CL'}</div>
             </div>
             <div>
-              <div className="font-display text-xl font-bold text-danger">{leaveBalance.sl}</div>
+              <div className="font-display text-xl font-bold text-danger">{sl}</div>
               <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'बीमारी' : 'SL'}</div>
             </div>
           </div>
@@ -262,9 +322,7 @@ const WorkerHome: React.FC = () => {
           <Award className="w-7 h-7 text-warning" />
           <div className="flex-1">
             <div className="text-sm font-semibold">EoTM {lang === 'hi' ? 'रैंक' : 'Rank'}</div>
-            <div className="text-xs text-muted-foreground">
-              #{eotmRank} {lang === 'hi' ? 'इस महीने' : 'this month'}
-            </div>
+            <div className="text-xs text-muted-foreground">#{eotmRank} {lang === 'hi' ? 'इस महीने' : 'this month'}</div>
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
@@ -316,20 +374,24 @@ const QuickAction: React.FC<{ icon: React.ElementType; label: string; sub: strin
   </button>
 );
 
-const AttendanceCalendar: React.FC<{ lang: string }> = ({ lang }) => {
-  const days = Array.from({ length: 30 }, (_, i) => {
-    const statuses = ['P', 'P', 'P', 'P', 'P', 'WO', 'P', 'L', 'P', 'P', 'P', 'P', 'WO', 'P', 'P', 'P', 'LC', 'P', 'P', 'WO', 'P', 'P', 'P', 'P', 'A', 'P', 'WO', 'P', 'P', 'P'];
-    return { day: i + 1, status: statuses[i] };
-  });
+const AttendanceCalendar: React.FC<{ lang: string; records: any[] }> = ({ lang, records }) => {
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay(); // 0=Sun
+  const offset = firstDay === 0 ? 6 : firstDay - 1; // Mon-based offset
 
   const statusColors: Record<string, string> = {
-    P: 'bg-success',
-    A: 'bg-danger',
-    L: 'bg-[hsl(var(--leave-purple))]',
-    LC: 'bg-warning',
-    WO: 'bg-muted',
-    H: 'bg-warning',
+    P: 'bg-success', A: 'bg-danger', L: 'bg-[hsl(var(--leave-purple))]',
+    LC: 'bg-warning', WO: 'bg-muted', H: 'bg-warning', EC: 'bg-warning',
+    OT: 'bg-info', HO: 'bg-muted',
   };
+
+  const days = Array.from({ length: daysInMonth }, (_, i) => {
+    const day = i + 1;
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const record = records.find(r => r.attendance_date === dateStr);
+    return { day, status: record?.status || (day <= now.getDate() ? null : null) };
+  });
 
   return (
     <div className="bg-card rounded-xl border border-border p-4">
@@ -337,13 +399,12 @@ const AttendanceCalendar: React.FC<{ lang: string }> = ({ lang }) => {
         {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
           <div key={d} className="text-center text-[10px] font-mono text-muted-foreground py-1">{d}</div>
         ))}
-        {/* offset for month start */}
-        <div />
+        {Array.from({ length: offset }).map((_, i) => <div key={`off-${i}`} />)}
         {days.map(({ day, status }) => (
           <div
             key={day}
             className={`aspect-square rounded-md flex items-center justify-center text-xs font-mono ${
-              statusColors[status] || 'bg-muted'
+              status ? (statusColors[status] || 'bg-muted') : 'bg-muted/30'
             } ${status === 'P' || status === 'LC' ? 'text-primary-foreground' : status === 'A' ? 'text-destructive-foreground' : 'text-foreground'}`}
           >
             {day}
