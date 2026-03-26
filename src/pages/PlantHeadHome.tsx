@@ -4,8 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { useTodayAttendanceAll, useAllEmployees, useAllScores } from '@/hooks/useEmployeeData';
-import { usePendingLeaveRequests } from '@/hooks/useRequestData';
-import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2 } from 'lucide-react';
+import { usePendingLeaveRequests, usePendingAdvanceRequests } from '@/hooks/useRequestData';
+import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2, Check, XIcon } from 'lucide-react';
+import MoreMenu from '@/components/MoreMenu';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 const PlantHeadHome: React.FC = () => {
   const { lang } = useLanguage();
