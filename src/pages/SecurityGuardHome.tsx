@@ -3,8 +3,7 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import ProfileScreen from '@/components/ProfileScreen';
-import SettingsScreen from '@/components/SettingsScreen';
+import MoreMenu from '@/components/MoreMenu';
 import { Shield, Truck, UserCheck, Clock, Plus, Search, ChevronRight } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -136,15 +135,7 @@ const SecurityGuardHome: React.FC = () => {
   }
 
   if (activeTab === 'more') {
-    return (
-      <div className="min-h-screen bg-background pb-20">
-        <TopBar />
-        <div className="px-4 py-4">
-          <SettingsScreen />
-        </div>
-        <BottomNav role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
-    );
+    return <MoreMenu role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />;
   }
 
   // Home

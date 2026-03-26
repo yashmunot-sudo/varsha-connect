@@ -4,17 +4,39 @@ import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { useTodayAttendanceAll, useAllEmployees, useAllScores } from '@/hooks/useEmployeeData';
-import { usePendingLeaveRequests } from '@/hooks/useRequestData';
-import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2 } from 'lucide-react';
+import { usePendingLeaveRequests, usePendingAdvanceRequests } from '@/hooks/useRequestData';
+import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2, Check, XIcon } from 'lucide-react';
+import MoreMenu from '@/components/MoreMenu';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 const PlantHeadHome: React.FC = () => {
   const { lang } = useLanguage();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  const queryClient = useQueryClient();
   const { data: allEmployees } = useAllEmployees();
   const { data: todayAttendance } = useTodayAttendanceAll();
   const { data: allScores } = useAllScores();
   const { data: pendingLeaves } = usePendingLeaveRequests();
+  const { data: pendingAdvances } = usePendingAdvanceRequests();
+
+  const totalPending = (pendingLeaves?.length || 0) + (pendingAdvances?.length || 0);
+
+  const handleApproval = async (table: 'leave_requests' | 'advance_requests', id: string, status: 'Approved' | 'Rejected') => {
+    const { error } = await supabase.from(table).update({
+      status,
+      reviewed_by: user?.employeeId,
+      reviewed_at: new Date().toISOString(),
+    } as any).eq('id', id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(status === 'Approved' ? '✓ Approved' : '✗ Rejected');
+      queryClient.invalidateQueries({ queryKey: ['pending_leave_requests'] });
+      queryClient.invalidateQueries({ queryKey: ['pending_advance_requests'] });
+    }
+  };
 
   const activeCount = allEmployees?.length || 0;
   const presentToday = todayAttendance?.filter(a => a.status === 'P' || a.status === 'LC' || a.status === 'OT').length || 0;
@@ -38,6 +60,86 @@ const PlantHeadHome: React.FC = () => {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? (lang === 'hi' ? 'सुप्रभात' : 'Good Morning') : hour < 17 ? (lang === 'hi' ? 'नमस्कार' : 'Good Afternoon') : (lang === 'hi' ? 'शुभ संध्या' : 'Good Evening');
+
+  if (activeTab === 'more') {
+    return <MoreMenu role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
+  }
+
+  if (activeTab === 'approvals') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <div className="px-4 py-4 space-y-4">
+          <h2 className="font-display text-lg font-bold text-foreground">Pending Approvals</h2>
+          {pendingLeaves?.map((req: any) => (
+            <div key={req.id} className="bg-card rounded-2xl border border-border card-shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">{req.employees?.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{req.employees?.emp_code}</div>
+                </div>
+                <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{req.leave_type}</span>
+              </div>
+              <div className="text-xs text-muted-foreground mb-3">{req.from_date} → {req.to_date}</div>
+              <div className="flex gap-2">
+                <button onClick={() => handleApproval('leave_requests', req.id, 'Approved')} className="flex-1 py-2 rounded-xl bg-success text-primary-foreground font-bold text-sm flex items-center justify-center gap-1"><Check className="w-4 h-4" /> Approve</button>
+                <button onClick={() => handleApproval('leave_requests', req.id, 'Rejected')} className="flex-1 py-2 rounded-xl bg-danger text-primary-foreground font-bold text-sm flex items-center justify-center gap-1"><XIcon className="w-4 h-4" /> Reject</button>
+              </div>
+            </div>
+          ))}
+          {pendingAdvances?.map((req: any) => (
+            <div key={req.id} className="bg-card rounded-2xl border border-border card-shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">{req.employees?.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{req.employees?.emp_code}</div>
+                </div>
+                <span className="font-display text-lg font-bold text-foreground">₹{req.amount_requested?.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => handleApproval('advance_requests', req.id, 'Approved')} className="flex-1 py-2 rounded-xl bg-success text-primary-foreground font-bold text-sm flex items-center justify-center gap-1"><Check className="w-4 h-4" /> Approve</button>
+                <button onClick={() => handleApproval('advance_requests', req.id, 'Rejected')} className="flex-1 py-2 rounded-xl bg-danger text-primary-foreground font-bold text-sm flex items-center justify-center gap-1"><XIcon className="w-4 h-4" /> Reject</button>
+              </div>
+            </div>
+          ))}
+          {totalPending === 0 && (
+            <div className="text-center py-12">
+              <Check className="w-8 h-8 text-success mx-auto mb-2" />
+              <div className="text-sm text-muted-foreground">All clear — no pending approvals</div>
+            </div>
+          )}
+        </div>
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'departments') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <div className="px-4 py-4 space-y-3">
+          <h2 className="font-display text-lg font-bold text-foreground">Department Performance</h2>
+          {deptStats.map((d, i) => (
+            <div key={d.dept} className="bg-card rounded-2xl border border-border card-shadow p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}</span>
+                  <span className="text-sm font-semibold text-foreground">{d.dept}</span>
+                </div>
+                <span className={`font-bold text-sm ${d.avgScore >= 70 ? 'text-success' : d.avgScore >= 50 ? 'text-warning' : 'text-danger'}`}>{d.avgScore} pts</span>
+              </div>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div className={`h-full rounded-full ${d.avgScore >= 70 ? 'bg-success' : d.avgScore >= 50 ? 'bg-warning' : 'bg-danger'}`} style={{ width: `${Math.min(d.avgScore, 100)}%` }} />
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-1">{d.present}/{d.total} present · {d.total} employees</div>
+            </div>
+          ))}
+        </div>
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -118,7 +220,7 @@ const PlantHeadHome: React.FC = () => {
           </p>
         </div>
       </div>
-      <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
     </div>
   );
 };

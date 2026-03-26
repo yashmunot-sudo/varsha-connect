@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { BarChart3, Users, FileCheck, Award, ChevronRight, TrendingUp, Check, XIcon, Briefcase } from 'lucide-react';
+import MoreMenu from '@/components/MoreMenu';
 import { useAllEmployees, useTodayAttendanceAll, useAllScores } from '@/hooks/useEmployeeData';
 import { usePendingLeaveRequests, usePendingAdvanceRequests } from '@/hooks/useRequestData';
 import { supabase } from '@/integrations/supabase/client';
@@ -192,6 +193,10 @@ const ManagerHome: React.FC = () => {
         <BottomNav role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
       </div>
     );
+  }
+
+  if (activeTab === 'more') {
+    return <MoreMenu role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
   }
 
   // Home
