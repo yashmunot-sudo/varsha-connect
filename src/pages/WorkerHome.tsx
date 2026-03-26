@@ -282,7 +282,7 @@ const WorkerHome: React.FC = () => {
           <button
             onClick={handleCheckIn}
             disabled={checkingIn}
-            className="w-full py-8 rounded-xl bg-primary text-primary-foreground font-display font-extrabold text-xl transition-all touch-target-xl glow-primary active:scale-95 disabled:opacity-70"
+            className="w-full py-8 rounded-2xl bg-primary text-primary-foreground font-display font-extrabold text-xl transition-all touch-target-xl shadow-lg shadow-primary/25 active:scale-[0.97] disabled:opacity-70"
           >
             {checkingIn ? (
               <span className="flex items-center justify-center gap-3">
