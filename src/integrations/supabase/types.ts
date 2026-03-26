@@ -14,16 +14,430 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance: {
+        Row: {
+          attendance_date: string
+          check_in_lat: number | null
+          check_in_lng: number | null
+          check_in_time: string | null
+          check_out_lat: number | null
+          check_out_lng: number | null
+          check_out_time: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          is_inside_geofence: boolean | null
+          manual_override: boolean
+          override_by: string | null
+          override_reason: string | null
+          points_earned: number | null
+          shift_type: Database["public"]["Enums"]["shift_type"] | null
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at: string
+        }
+        Insert: {
+          attendance_date?: string
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_in_time?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          check_out_time?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          is_inside_geofence?: boolean | null
+          manual_override?: boolean
+          override_by?: string | null
+          override_reason?: string | null
+          points_earned?: number | null
+          shift_type?: Database["public"]["Enums"]["shift_type"] | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+        }
+        Update: {
+          attendance_date?: string
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_in_time?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          check_out_time?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          is_inside_geofence?: boolean | null
+          manual_override?: boolean
+          override_by?: string | null
+          override_reason?: string | null
+          points_earned?: number | null
+          shift_type?: Database["public"]["Enums"]["shift_type"] | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casual_workers: {
+        Row: {
+          created_at: string
+          department: string | null
+          id: string
+          id_number: string | null
+          logged_by: string
+          name: string
+          work_date: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          id_number?: string | null
+          logged_by: string
+          name: string
+          work_date?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          id_number?: string | null
+          logged_by?: string
+          name?: string
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casual_workers_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees: {
+        Row: {
+          auth_user_id: string | null
+          base_salary: number | null
+          category: Database["public"]["Enums"]["employee_category"]
+          conveyance: number | null
+          created_at: string
+          department: string
+          emp_code: string
+          esic_deduction: number | null
+          hra: number | null
+          id: string
+          is_active: boolean
+          medical: number | null
+          name: string
+          name_hi: string | null
+          pf_deduction: number | null
+          phone: string
+          role: Database["public"]["Enums"]["app_role"]
+          special_allowance: number | null
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id?: string | null
+          base_salary?: number | null
+          category?: Database["public"]["Enums"]["employee_category"]
+          conveyance?: number | null
+          created_at?: string
+          department?: string
+          emp_code: string
+          esic_deduction?: number | null
+          hra?: number | null
+          id?: string
+          is_active?: boolean
+          medical?: number | null
+          name: string
+          name_hi?: string | null
+          pf_deduction?: number | null
+          phone: string
+          role?: Database["public"]["Enums"]["app_role"]
+          special_allowance?: number | null
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string | null
+          base_salary?: number | null
+          category?: Database["public"]["Enums"]["employee_category"]
+          conveyance?: number | null
+          created_at?: string
+          department?: string
+          emp_code?: string
+          esic_deduction?: number | null
+          hra?: number | null
+          id?: string
+          is_active?: boolean
+          medical?: number | null
+          name?: string
+          name_hi?: string | null
+          pf_deduction?: number | null
+          phone?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          special_allowance?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      leave_balances: {
+        Row: {
+          casual_leave: number
+          cl_used: number
+          created_at: string
+          earned_leave: number
+          el_used: number
+          employee_id: string
+          id: string
+          sick_leave: number
+          sl_used: number
+          year: number
+        }
+        Insert: {
+          casual_leave?: number
+          cl_used?: number
+          created_at?: string
+          earned_leave?: number
+          el_used?: number
+          employee_id: string
+          id?: string
+          sick_leave?: number
+          sl_used?: number
+          year?: number
+        }
+        Update: {
+          casual_leave?: number
+          cl_used?: number
+          created_at?: string
+          earned_leave?: number
+          el_used?: number
+          employee_id?: string
+          id?: string
+          sick_leave?: number
+          sl_used?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monthly_scores: {
+        Row: {
+          attendance_score: number | null
+          composite_score: number | null
+          created_at: string
+          employee_id: string
+          eotm_rank: number | null
+          id: string
+          month: number
+          observation_score: number | null
+          performance_score: number | null
+          year: number
+        }
+        Insert: {
+          attendance_score?: number | null
+          composite_score?: number | null
+          created_at?: string
+          employee_id: string
+          eotm_rank?: number | null
+          id?: string
+          month: number
+          observation_score?: number | null
+          performance_score?: number | null
+          year: number
+        }
+        Update: {
+          attendance_score?: number | null
+          composite_score?: number | null
+          created_at?: string
+          employee_id?: string
+          eotm_rank?: number | null
+          id?: string
+          month?: number
+          observation_score?: number | null
+          performance_score?: number | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_scores_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_master: {
+        Row: {
+          created_at: string
+          days_absent: number | null
+          days_present: number | null
+          employee_id: string
+          gross_salary: number | null
+          id: string
+          month: number
+          net_salary: number | null
+          overtime_hours: number | null
+          total_deductions: number | null
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          days_absent?: number | null
+          days_present?: number | null
+          employee_id: string
+          gross_salary?: number | null
+          id?: string
+          month: number
+          net_salary?: number | null
+          overtime_hours?: number | null
+          total_deductions?: number | null
+          year: number
+        }
+        Update: {
+          created_at?: string
+          days_absent?: number | null
+          days_present?: number | null
+          employee_id?: string
+          gross_salary?: number | null
+          id?: string
+          month?: number
+          net_salary?: number | null
+          overtime_hours?: number | null
+          total_deductions?: number | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_master_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          published: boolean
+          published_at: string | null
+          published_by: string | null
+          shift_date: string
+          shift_type: Database["public"]["Enums"]["shift_type"]
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          published_by?: string | null
+          shift_date: string
+          shift_type?: Database["public"]["Enums"]["shift_type"]
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          published?: boolean
+          published_at?: string | null
+          published_by?: string | null
+          shift_date?: string
+          shift_type?: Database["public"]["Enums"]["shift_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_my_employee_id: { Args: never; Returns: string }
+      get_my_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "worker" | "supervisor" | "manager" | "hr_admin" | "owner"
+      attendance_status:
+        | "P"
+        | "H"
+        | "LC"
+        | "EC"
+        | "OT"
+        | "A"
+        | "L"
+        | "WO"
+        | "HO"
+      employee_category: "WORKER" | "STAFF" | "CONSULTANT"
+      shift_type: "general" | "first" | "second" | "third" | "day" | "night"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +564,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["worker", "supervisor", "manager", "hr_admin", "owner"],
+      attendance_status: ["P", "H", "LC", "EC", "OT", "A", "L", "WO", "HO"],
+      employee_category: ["WORKER", "STAFF", "CONSULTANT"],
+      shift_type: ["general", "first", "second", "third", "day", "night"],
+    },
   },
 } as const

@@ -3,9 +3,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { UserRole, USER_ROLES } from '@/lib/constants';
 import { Phone, Shield, Globe, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 
 const LoginPage: React.FC = () => {
-  const { login, setDemoUser } = useAuth();
+  const { sendOTP, verifyOTP, setDemoUser } = useAuth();
   const { lang, setLang } = useLanguage();
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -15,15 +16,23 @@ const LoginPage: React.FC = () => {
   const handleSendOTP = async () => {
     if (phone.length < 10) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    setStep('otp');
+    const { error } = await sendOTP(phone);
+    if (error) {
+      toast.error(error);
+    } else {
+      setStep('otp');
+      toast.success(lang === 'hi' ? 'OTP भेजा गया' : 'OTP sent');
+    }
     setLoading(false);
   };
 
   const handleVerifyOTP = async () => {
     if (otp.length < 4) return;
     setLoading(true);
-    await login(phone, otp);
+    const { error } = await verifyOTP(phone, otp);
+    if (error) {
+      toast.error(error);
+    }
     setLoading(false);
   };
 
@@ -66,7 +75,6 @@ const LoginPage: React.FC = () => {
       <div className="flex-1 px-6 py-6 space-y-6">
         {step === 'demo' && (
           <>
-            {/* Phone login option */}
             <button
               onClick={() => setStep('phone')}
               className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-secondary transition-colors"
@@ -85,7 +93,6 @@ const LoginPage: React.FC = () => {
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
 
-            {/* Demo role selector */}
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <span className="font-mono text-[10px] text-primary tracking-[0.2em] uppercase">
@@ -127,9 +134,7 @@ const LoginPage: React.FC = () => {
                 {lang === 'hi' ? 'फ़ोन नंबर' : 'Phone Number'}
               </label>
               <div className="flex gap-2">
-                <span className="flex items-center px-3 rounded-lg border border-border bg-muted text-sm font-mono text-muted-foreground">
-                  +91
-                </span>
+                <span className="flex items-center px-3 rounded-lg border border-border bg-muted text-sm font-mono text-muted-foreground">+91</span>
                 <input
                   type="tel"
                   maxLength={10}
@@ -145,9 +150,7 @@ const LoginPage: React.FC = () => {
               disabled={phone.length < 10 || loading}
               className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base disabled:opacity-50 transition-all touch-target hover:brightness-110"
             >
-              {loading
-                ? (lang === 'hi' ? 'भेज रहे हैं...' : 'Sending...')
-                : (lang === 'hi' ? 'OTP भेजें' : 'Send OTP')}
+              {loading ? (lang === 'hi' ? 'भेज रहे हैं...' : 'Sending...') : (lang === 'hi' ? 'OTP भेजें' : 'Send OTP')}
             </button>
           </div>
         )}
@@ -176,15 +179,12 @@ const LoginPage: React.FC = () => {
               disabled={otp.length < 4 || loading}
               className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-base disabled:opacity-50 transition-all touch-target hover:brightness-110"
             >
-              {loading
-                ? (lang === 'hi' ? 'सत्यापित हो रहा है...' : 'Verifying...')
-                : (lang === 'hi' ? 'OTP सत्यापित करें' : 'Verify OTP')}
+              {loading ? (lang === 'hi' ? 'सत्यापित हो रहा है...' : 'Verifying...') : (lang === 'hi' ? 'OTP सत्यापित करें' : 'Verify OTP')}
             </button>
           </div>
         )}
       </div>
 
-      {/* Footer */}
       <div className="px-6 py-4 border-t border-border">
         <p className="text-center font-mono text-[10px] text-muted-foreground tracking-wider">
           VARSHA FORGINGS PVT LTD · AURANGABAD
