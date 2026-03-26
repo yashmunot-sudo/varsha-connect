@@ -583,13 +583,13 @@ const StatCard: React.FC<{ label: string; value: string; color: string; bg?: str
 );
 
 const ScoreRow: React.FC<{ label: string; value: number; max: number; color: string }> = ({ label, value, max, color }) => (
-  <div className="bg-card rounded-xl border border-border card-shadow p-4">
+  <div className="bg-card rounded-2xl border border-border card-shadow p-4">
     <div className="flex items-center justify-between mb-2">
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs text-muted-foreground font-medium">{label}</span>
       <span className="text-sm font-bold text-foreground">{value}</span>
     </div>
-    <div className="h-2 rounded-full bg-muted overflow-hidden">
-      <div className={`h-full rounded-full ${color}`} style={{ width: `${(value / max) * 100}%` }} />
+    <div className="h-2.5 rounded-full bg-muted overflow-hidden">
+      <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${(value / max) * 100}%` }} />
     </div>
   </div>
 );
