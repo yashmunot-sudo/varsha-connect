@@ -3,8 +3,11 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import { Users, AlertTriangle, Award, IndianRupee, Heart, ChevronRight, TrendingUp, Factory, Zap } from 'lucide-react';
+import { Users, AlertTriangle, Award, IndianRupee, Heart, ChevronRight, TrendingUp, Factory, Zap, ClipboardList, Mail, ShoppingCart } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
+import MRMReviewTab from '@/components/MRMReviewTab';
+import EmailTasksTab from '@/components/EmailTasksTab';
+import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
 import { useAllEmployees, useTodayAttendanceAll, useAllScores } from '@/hooks/useEmployeeData';
 
 const OwnerHome: React.FC = () => {
