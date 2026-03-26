@@ -1,16 +1,44 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import LoginPage from './LoginPage';
+import WorkerHome from './WorkerHome';
+import SupervisorHome from './SupervisorHome';
+import ManagerHome from './ManagerHome';
+import HRAdminHome from './HRAdminHome';
+import OwnerHome from './OwnerHome';
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
-  return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
-  );
+const Index: React.FC = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="font-display text-2xl font-extrabold text-gradient-fire mb-2">VFL</div>
+          <div className="font-mono text-[10px] text-muted-foreground tracking-[0.3em] uppercase">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  switch (user.role) {
+    case 'worker':
+      return <WorkerHome />;
+    case 'supervisor':
+      return <SupervisorHome />;
+    case 'manager':
+      return <ManagerHome />;
+    case 'hr_admin':
+      return <HRAdminHome />;
+    case 'owner':
+      return <OwnerHome />;
+    default:
+      return <WorkerHome />;
+  }
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
