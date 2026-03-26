@@ -8,6 +8,7 @@ import HRAdminHome from './HRAdminHome';
 import OwnerHome from './OwnerHome';
 import PlantHeadHome from './PlantHeadHome';
 import SecurityGuardHome from './SecurityGuardHome';
+import MissingDataBanner from '@/components/MissingDataBanner';
 import vflLogo from '@/assets/vfl-logo.jpeg';
 
 const Index: React.FC = () => {
