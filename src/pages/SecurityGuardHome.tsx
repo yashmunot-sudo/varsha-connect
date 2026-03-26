@@ -59,10 +59,11 @@ const SecurityGuardHome: React.FC = () => {
       driver_name: driverName || null,
       purpose,
       material_description: material || null,
-      entry_time: new Date().toISOString(),
-      entry_date: today,
+      time_in: new Date().toISOString(),
+      log_date: today,
+      shift: 'general',
       logged_by: user.employeeId,
-    } as any);
+    });
     if (error) {
       toast.error(error.message);
     } else {
