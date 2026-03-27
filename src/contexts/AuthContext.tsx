@@ -199,12 +199,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setDemoUser = async (role: UserRole) => {
+    setIsLoading(true);
+    setUser(null);
+    localStorage.removeItem('vfl-user');
+    await supabase.auth.signOut();
+    await new Promise(resolve => setTimeout(resolve, 500));
     const phone = DEMO_PHONES[role];
     const emp = await fetchEmployeeByPhone(phone);
     if (emp) {
       setUser(emp);
       localStorage.setItem('vfl-user', JSON.stringify(emp));
     }
+    setIsLoading(false);
   };
 
   return (
