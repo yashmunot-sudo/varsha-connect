@@ -10,6 +10,7 @@ import PayslipScreen from './PayslipScreen';
 import EmployeeRecordsScreen from './EmployeeRecordsScreen';
 import TaskDelegationScreen from './TaskDelegationScreen';
 import PartMasterScreen from './PartMasterScreen';
+import GRNScreen from './GRNScreen';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
 import { UserRole } from '@/lib/constants';
@@ -38,6 +39,7 @@ const MoreMenu: React.FC<MoreMenuProps> = ({ role, activeTab, onTabChange, badge
     { id: 'leaderboard', icon: Award, label_hi: 'EoTM लीडरबोर्ड', label_en: 'Leaderboard', sub_hi: 'रैंकिंग देखें', sub_en: 'View rankings', show: true },
     { id: 'employee_records', icon: Users, label_hi: 'कर्मचारी रिकॉर्ड', label_en: 'Employee Records', sub_hi: 'कर्मचारी प्रबंधन', sub_en: 'Manage employees', show: isOwnerOrHR },
     { id: 'part_master', icon: Wrench, label_hi: 'पार्ट मास्टर', label_en: 'Part Master', sub_hi: 'पार्ट प्रबंधन', sub_en: 'Manage parts', show: isOwnerOrHR || role === 'plant_head' },
+    { id: 'grn', icon: ClipboardList, label_hi: 'GRN / माल रसीद', label_en: 'GRN / Goods Receipt', sub_hi: 'माल प्राप्ति नोट', sub_en: 'Goods receipt notes', show: isManager },
     { id: 'settings', icon: Settings, label_hi: 'सेटिंग्स', label_en: 'Settings', sub_hi: 'भाषा, सहायता', sub_en: 'Language, help', show: true },
   ];
 
@@ -52,6 +54,7 @@ const MoreMenu: React.FC<MoreMenuProps> = ({ role, activeTab, onTabChange, badge
       case 'tasks': return <TaskDelegationScreen lang={lang} />;
       case 'employee_records': return <EmployeeRecordsScreen lang={lang} isOwner={role === 'owner'} />;
       case 'part_master': return <PartMasterScreen lang={lang} />;
+      case 'grn': return <GRNScreen lang={lang} />;
       case 'settings': return <SettingsScreen />;
       default: return null;
     }

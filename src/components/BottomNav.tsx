@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { Home, Calendar, BarChart3, FileText, Menu, Users, Settings, ClipboardList, TrendingUp, ShoppingCart, Mail } from 'lucide-react';
+import { Home, Calendar, BarChart3, FileText, Menu, Users, Settings, ClipboardList, TrendingUp, ShoppingCart, Mail, Factory } from 'lucide-react';
 import { UserRole } from '@/lib/constants';
 
 interface BottomNavProps {
@@ -8,6 +8,7 @@ interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   badges?: Record<string, number>;
+  department?: string;
 }
 
 const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; label_hi: string; label_en: string }[]> = {
@@ -60,9 +61,22 @@ const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; labe
   ],
 };
 
-const BottomNav: React.FC<BottomNavProps> = ({ role, activeTab, onTabChange, badges = {} }) => {
+const PRODUCTION_DEPARTMENTS = ['Machine Shop', 'VMC Shop'];
+
+const BottomNav: React.FC<BottomNavProps> = ({ role, activeTab, onTabChange, badges = {}, department }) => {
   const { lang } = useLanguage();
-  const items = roleNavItems[role] || roleNavItems.worker;
+  let items = roleNavItems[role] || roleNavItems.worker;
+
+  // Add Production tab for Machine Shop / VMC Shop workers
+  if (role === 'worker' && department && PRODUCTION_DEPARTMENTS.includes(department)) {
+    items = [
+      items[0], // home
+      items[1], // attendance
+      { id: 'production', icon: Factory, label_hi: 'उत्पादन', label_en: 'Production' },
+      items[3], // leaves
+      items[4], // more
+    ];
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-card/98 backdrop-blur-md safe-bottom">

@@ -172,7 +172,7 @@ const WorkerHome: React.FC = () => {
             <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value={String(lateCount)} color="text-warning" bg="bg-warning/10" />
           </div>
         </div>
-        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
       </div>
     );
   }
@@ -204,7 +204,7 @@ const WorkerHome: React.FC = () => {
             </div>
           </div>
         </div>
-        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
       </div>
     );
   }
@@ -256,10 +256,36 @@ const WorkerHome: React.FC = () => {
             </button>
           </div>
         </div>
-        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
 
         {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
         {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
+      </div>
+    );
+  }
+
+  if (activeTab === 'production') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <div className="px-4 py-4 flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <Wrench className="w-10 h-10 text-primary" />
+          </div>
+          <h2 className="font-display text-xl font-extrabold text-foreground">
+            जल्द आ रहा है
+          </h2>
+          <h2 className="font-display text-xl font-extrabold text-foreground">
+            Coming Soon
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            उत्पादन डेटा एंट्री और प्रदर्शन ट्रैकिंग जल्द ही यहाँ उपलब्ध होगी।
+          </p>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Production data entry and performance tracking will be available here soon.
+          </p>
+        </div>
+        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
       </div>
     );
   }
@@ -462,7 +488,7 @@ const WorkerHome: React.FC = () => {
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
       </div>
-      <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
 
       {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
       {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
