@@ -262,48 +262,7 @@ const SupervisorHome: React.FC = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
-        <div className="px-4 py-4 space-y-4">
-          <h2 className="font-display text-lg font-bold text-foreground">
-            {lang === 'hi' ? 'कैज़ुअल वर्कर लॉग' : 'Log Casual Workers'}
-          </h2>
-          <div className="bg-card rounded-2xl border border-border card-shadow p-4 space-y-3">
-            <input
-              type="text"
-              value={casualName}
-              onChange={e => setCasualName(e.target.value)}
-              placeholder={lang === 'hi' ? 'नाम' : 'Name'}
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-            />
-            <input
-              type="text"
-              value={casualId}
-              onChange={e => setCasualId(e.target.value)}
-              placeholder={lang === 'hi' ? 'ID नंबर (वैकल्पिक)' : 'ID Number (optional)'}
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-            />
-            <button onClick={handleAddCasual} disabled={!casualName.trim()} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target disabled:opacity-50 shadow-md shadow-primary/20 active:scale-[0.98] transition-all">
-              <Plus className="w-4 h-4 inline mr-2" />
-              {lang === 'hi' ? 'जोड़ें' : 'Add Worker'}
-            </button>
-          </div>
-
-          {casualWorkers && casualWorkers.length > 0 && (
-            <>
-              <div className="text-[10px] text-primary font-semibold tracking-[0.15em] uppercase">
-                {lang === 'hi' ? 'आज लॉग किए गए' : 'Logged Today'}: {casualWorkers.length}
-              </div>
-              {casualWorkers.map((cw: any) => (
-                <div key={cw.id} className="bg-card rounded-2xl border border-border card-shadow p-3.5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-                    <UserCheck className="w-4 h-4 text-success" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground flex-1">{cw.name}</span>
-                  <span className="text-[10px] text-muted-foreground font-mono">{cw.id_number || '-'}</span>
-                </div>
-              ))}
-            </>
-          )}
-        </div>
+        <CasualWorkerCount />
         <BottomNav role="supervisor" activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     );
