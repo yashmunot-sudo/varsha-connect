@@ -89,8 +89,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ role, activeTab, onTabChange, bad
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] leading-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
-                {lang === 'hi' ? item.label_hi : item.label_en}
+              <span className={`text-[9px] leading-tight text-center ${isActive ? 'font-bold' : 'font-medium'}`}>
+                {lang === 'hi' ? `${item.label_hi}` : `${item.label_en}`}
+              </span>
+              <span className={`text-[8px] leading-tight text-center opacity-70 ${isActive ? 'font-semibold' : ''}`}>
+                {lang === 'hi' ? item.label_en : item.label_hi}
               </span>
               {isActive && <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
             </button>
