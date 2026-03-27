@@ -204,7 +204,7 @@ const WorkerHome: React.FC = () => {
             </div>
           </div>
         </div>
-        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
       </div>
     );
   }
