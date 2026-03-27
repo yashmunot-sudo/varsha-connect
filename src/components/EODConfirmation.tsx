@@ -1,85 +1,63 @@
 import React, { useState } from 'react';
+
 import { BilingualText } from './BilingualText';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
-interface EODSubmitData {
-  status: 'Exception' | 'Matched';
-  note: string;
-  vehicles: number;
-  grns: number;
-}
+import { AlertCircle, CheckCircle2, Truck, FileText } from 'lucide-react';
 
-interface EODConfirmationProps {
-  vehicleCount: number;
-  grnCount: number;
-  onSubmit: (data: EODSubmitData) => void;
-}
+interface EODConfirmationProps { vehicleCount: number; grnCount: number; onSubmit: (data: { status: string; note: string; vehicles: number; grns: number }) => void; loading?: boolean; }
 
-export function EODConfirmation({ vehicleCount, grnCount, onSubmit }: EODConfirmationProps) {
+export function EODConfirmation({ vehicleCount, grnCount, onSubmit, loading = false }: EODConfirmationProps) {
+
   const [exceptionNote, setExceptionNote] = useState('');
+
   const isMismatch = vehicleCount !== grnCount;
 
-  const handleConfirm = () => {
-    onSubmit({
-      status: isMismatch ? 'Exception' : 'Matched',
-      note: exceptionNote,
-      vehicles: vehicleCount,
-      grns: grnCount
-    });
-  };
+  const canConfirm = !isMismatch || exceptionNote.trim().length >= 10;
+
+  const handleConfirm = () => { if (!canConfirm) return; onSubmit({ status: isMismatch ? 'Exception' : 'Matched', note: exceptionNote, vehicles: vehicleCount, grns: grnCount }); };
 
   return (
-    <div className="p-4 bg-card rounded-xl shadow-sm border border-border">
-      <h3 className="text-lg font-bold text-center mb-4">
-        <BilingualText hindi="दिन का अंत" english="End of Day Confirmation" />
-      </h3>
 
-      <div className="flex justify-around mb-6 text-center">
-        <div className="p-3 bg-info/10 rounded-xl w-5/12">
-          <p className="text-2xl font-bold text-info">{vehicleCount}</p>
-          <BilingualText hindi="वाहन" english="Vehicles Logged" className="text-xs text-info mt-1" />
-        </div>
-        <div className="p-3 bg-primary/10 rounded-xl w-5/12">
-          <p className="text-2xl font-bold text-primary">{grnCount}</p>
-          <BilingualText hindi="प्राप्त माल" english="GRNs Raised" className="text-xs text-primary mt-1" />
-        </div>
+    <div className="p-4 bg-card rounded-2xl border border-border card-shadow">
+
+      <div className="text-center mb-4"><BilingualText hindi="दिन का अंत" english="End of Day Confirmation" size="base" /></div>
+
+      <div className="flex gap-3 mb-4">
+
+        <div className="flex-1 p-3 bg-info/10 rounded-xl text-center"><Truck className="w-5 h-5 text-info mx-auto mb-1" /><p className="text-2xl font-bold text-foreground">{vehicleCount}</p><BilingualText hindi="वाहन" english="Vehicles" size="xs" textColor="text-muted-foreground" /></div>
+
+        <div className="flex-1 p-3 bg-primary/10 rounded-xl text-center"><FileText className="w-5 h-5 text-primary mx-auto mb-1" /><p className="text-2xl font-bold text-foreground">{grnCount}</p><BilingualText hindi="GRN" english="GRNs Raised" size="xs" textColor="text-muted-foreground" /></div>
+
       </div>
 
       {isMismatch ? (
-        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
-          <div className="flex items-center text-destructive mb-2 font-bold">
-            <AlertCircle className="w-5 h-5 mr-2 shrink-0" />
-            <BilingualText hindi="चेतावनी: डेटा मेल नहीं खा रहा" english="Warning: Data Mismatch" />
-          </div>
-          <p className="text-sm text-destructive/80 mb-3">
-            Some vehicles do not have a matching GRN. To close the gate, you must enter a reason. This will be reported to the Plant Head.
-          </p>
-          <textarea
-            value={exceptionNote}
-            onChange={(e) => setExceptionNote(e.target.value)}
-            placeholder="कारण लिखें... / Enter reason..."
-            className="w-full p-3 border border-border rounded-xl text-sm mb-2 focus:ring-2 focus:ring-destructive/40 outline-none bg-background text-foreground"
-            rows={3}
-          />
+
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-xl">
+
+          <div className="flex items-center gap-2 text-destructive font-bold mb-2"><AlertCircle className="w-4 h-4" /><BilingualText hindi="चेतावनी: मिलान नहीं" english="Warning: Data Mismatch" size="xs" /></div>
+
+          <p className="text-xs text-muted-foreground mb-2">{vehicleCount - grnCount} vehicle(s) have no matching GRN. Enter a reason to proceed.</p>
+
+          <textarea value={exceptionNote} onChange={(e) => setExceptionNote(e.target.value)} placeholder="कारण लिखें... / Enter reason (minimum 10 characters)..." className="w-full p-3 rounded-xl border border-border bg-background text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/40" rows={3} />
+
         </div>
+
       ) : (
-        <div className="flex items-center justify-center text-success mb-6 p-3 bg-success/10 rounded-xl font-bold">
-          <CheckCircle2 className="w-6 h-6 mr-2 shrink-0" />
-          <BilingualText hindi="डेटा सही है" english="Data Matched Successfully" />
-        </div>
+
+        <div className="flex items-center justify-center gap-2 p-3 bg-success/10 border border-success/30 rounded-xl mb-4"><CheckCircle2 className="w-5 h-5 text-success" /><BilingualText hindi="सब मिल गया" english="All data matched" size="sm" textColor="text-success" /></div>
+
       )}
 
-      <button
-        onClick={handleConfirm}
-        disabled={isMismatch && exceptionNote.trim().length < 5}
-        className={`w-full min-h-[56px] rounded-xl font-bold text-base text-primary-foreground transition-colors disabled:opacity-50
-          ${isMismatch ? 'bg-destructive hover:bg-destructive/90' : 'bg-primary hover:bg-primary/90'}`}
-      >
-        <BilingualText
-          hindi={isMismatch ? "अपवाद के साथ बंद करें" : "पुष्टि करें"}
-          english={isMismatch ? "Close with Exception" : "Confirm EOD"}
-        />
+      <button onClick={handleConfirm} disabled={!canConfirm || loading} className={'w-full min-h-[56px] rounded-xl font-bold text-primary-foreground transition-all active:scale-[0.97] disabled:opacity-50 ' + (isMismatch ? 'bg-warning' : 'bg-success')}>
+
+        <BilingualText hindi={isMismatch ? 'अपवाद के साथ बंद करें' : 'EOD पुष्टि करें'} english={isMismatch ? 'Close with Exception' : 'Confirm EOD'} textColor="text-primary-foreground" size="sm" />
+
       </button>
+
     </div>
+
   );
+
 }
+
+export default EODConfirmation;
