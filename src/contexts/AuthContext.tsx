@@ -36,13 +36,13 @@ const AuthContext = createContext<AuthContextType>({
 
 // Demo users for quick testing without real OTP
 const DEMO_PHONES: Record<UserRole, string> = {
-  worker: '+919876543210',
-  supervisor: '+919876543211',
-  manager: '+919876543212',
-  hr_admin: '+919876543213',
-  owner: '+919876543214',
-  plant_head: '+919823395533',
-  security_guard: '+919876543215',
+  worker: '8888516837',
+  supervisor: '7719012879',
+  manager: '9922725811',
+  hr_admin: '7972068310',
+  owner: '9823080707',
+  plant_head: '9823395533',
+  security_guard: '9823080707', // fallback to owner since no security_guard role exists
 };
 
 async function fetchEmployeeByPhone(phone: string): Promise<AuthUser | null> {
