@@ -82,6 +82,10 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
 
   const handleSubmit = async () => {
     if (!employeeId || !fromDate || !toDate) return;
+    if (leaveType === 'CO' && (!compOffDays || compOffDays.length === 0)) {
+      toast.error(lang === 'hi' ? 'कोई कम्प-ऑफ उपलब्ध नहीं' : 'No comp-off days available');
+      return;
+    }
     setSubmitting(true);
 
     // Determine approver - if low coverage, escalate to plant head
@@ -104,6 +108,15 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
     if (error) {
       toast.error(error.message);
     } else {
+      // If comp-off, mark days as used
+      if (leaveType === 'CO' && compOffDays) {
+        const daysNeeded = Math.ceil((new Date(toDate).getTime() - new Date(fromDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const toUse = compOffDays.slice(0, daysNeeded);
+        for (const co of toUse) {
+          await supabase.from('comp_off_balance').update({ is_used: true }).eq('id', co.id);
+        }
+      }
+
       // Notify approver
       if (approverId) {
         await supabase.from('notifications').insert({
@@ -115,6 +128,7 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
       }
       toast.success(lang === 'hi' ? 'आवेदन भेज दिया गया / Application Submitted' : 'Application Submitted / आवेदन भेज दिया गया');
       queryClient.invalidateQueries({ queryKey: ['pending_leave_requests'] });
+      queryClient.invalidateQueries({ queryKey: ['comp_off_available'] });
       onClose();
     }
     setSubmitting(false);
