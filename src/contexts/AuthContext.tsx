@@ -202,35 +202,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setDemoUser = async (role: UserRole) => {
-    console.log('[DemoLogin] Starting for role:', role);
     isDemoLoginRef.current = true;
     setIsLoading(true);
     setUser(null);
     localStorage.removeItem('vfl-user');
     try {
       await supabase.auth.signOut();
-      console.log('[DemoLogin] signOut complete');
-    } catch (e) {
-      console.error('[DemoLogin] signOut error:', e);
-    }
+    } catch {}
     await new Promise(resolve => setTimeout(resolve, 500));
     const phone = DEMO_PHONES[role];
-    console.log('[DemoLogin] Fetching employee for phone:', phone);
-    try {
-      const emp = await fetchEmployeeByPhone(phone);
-      console.log('[DemoLogin] Employee result:', emp);
-      if (emp) {
-        setUser(emp);
-        localStorage.setItem('vfl-user', JSON.stringify(emp));
-      } else {
-        console.error('[DemoLogin] No employee found for phone:', phone);
-      }
-    } catch (e) {
-      console.error('[DemoLogin] fetchEmployee error:', e);
+    const emp = await fetchEmployeeByPhone(phone);
+    if (emp) {
+      setUser(emp);
+      localStorage.setItem('vfl-user', JSON.stringify(emp));
     }
     setIsLoading(false);
     isDemoLoginRef.current = false;
-    console.log('[DemoLogin] Complete');
   };
 
   return (
