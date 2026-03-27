@@ -22,7 +22,7 @@ const AddEmployeeForm: React.FC<Props> = ({ lang, onClose }) => {
     'Administration', 'Purchase', 'Marketing', 'Design', 'Accounts', 'HR', 'IT', 'Production'];
 
   const roles = [
-    { value: 'worker', label: 'Worker / कर्मचारी' },
+    { value: 'worker', label: 'Member / सदस्य' },
     { value: 'supervisor', label: 'Supervisor / सुपरवाइज़र' },
     { value: 'manager', label: 'Manager / मैनेजर' },
     { value: 'hr_admin', label: 'HR Admin' },
@@ -121,7 +121,7 @@ const AddEmployeeForm: React.FC<Props> = ({ lang, onClose }) => {
             <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'प्रकार / Type' : 'Salary Type'}</label>
             <select value={form.salary_type} onChange={e => update('salary_type', e.target.value)}
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground">
-              <option value="WORKER">Worker / कर्मचारी</option>
+              <option value="WORKER">Member / सदस्य</option>
               <option value="STAFF">Staff / स्टाफ</option>
             </select>
           </div>

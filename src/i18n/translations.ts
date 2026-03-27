@@ -58,7 +58,7 @@ const translations = {
   // Supervisor
   my_team: { hi: 'मेरी टीम', en: 'My Team' },
   team_attendance: { hi: 'टीम उपस्थिति', en: 'Team Attendance' },
-  log_casual_workers: { hi: 'कैज़ुअल वर्कर लॉग', en: 'Log Casual Workers' },
+  log_casual_workers: { hi: 'कैज़ुअल सदस्य लॉग', en: 'Log Casual Members' },
   shift_report: { hi: 'शिफ्ट रिपोर्ट', en: 'Shift Report' },
   fill_report: { hi: 'रिपोर्ट भरें', en: 'Fill Report' },
   
