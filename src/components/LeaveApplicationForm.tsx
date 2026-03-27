@@ -155,7 +155,19 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        {leaveType === 'CO' && (
+          <div className="bg-info/10 border border-info/30 rounded-xl p-3">
+            <div className="text-xs font-bold text-info">
+              {lang === 'hi' ? 'उपलब्ध कम्प-ऑफ' : 'Available Comp-Off'}: {compOffDays?.length || 0} {lang === 'hi' ? 'दिन' : 'days'}
+            </div>
+            {compOffDays && compOffDays.length > 0 && (
+              <div className="text-[10px] text-muted-foreground mt-1">
+                {lang === 'hi' ? 'समाप्ति तिथि' : 'Expires'}: {compOffDays.map(c => c.expiry_date).join(', ')}
+              </div>
+            )}
+          </div>
+        )}
+
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'से / From' : 'From / से'}</label>
             <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
