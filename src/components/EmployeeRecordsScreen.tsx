@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, ChevronRight, Plus, User, Briefcase, Calendar, FileText, ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import AddEmployeeForm from './AddEmployeeForm';
 
 interface EmployeeRecordsScreenProps {
   lang: string;
