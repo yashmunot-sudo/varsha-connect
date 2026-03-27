@@ -51,7 +51,7 @@ export const SCORE_WEIGHTS = {
 
 // Employee categories
 export const EMPLOYEE_CATEGORIES = {
-  WORKER: { prefix: 'VFL4', label_en: 'Worker', label_hi: 'कर्मचारी' },
+  WORKER: { prefix: 'VFL4', label_en: 'Member', label_hi: 'सदस्य' },
   STAFF: { prefix: 'VFL1', label_en: 'Staff', label_hi: 'स्टाफ' },
   CONSULTANT: { prefix: 'CON', label_en: 'Consultant', label_hi: 'सलाहकार' },
 } as const;
