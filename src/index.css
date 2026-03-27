@@ -173,3 +173,11 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Print CSS for Payslip */
+@media print {
+  body { background: white !important; }
+  nav, .safe-bottom, button, .print\\:hidden { display: none !important; }
+  #payslip-content { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+  @page { size: A4; margin: 10mm; }
+}

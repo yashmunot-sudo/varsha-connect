@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, ChevronRight, Plus, User, Briefcase, Calendar, FileText, ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import AddEmployeeForm from './AddEmployeeForm';
 
 interface EmployeeRecordsScreenProps {
   lang: string;
@@ -18,6 +19,7 @@ const EmployeeRecordsScreen: React.FC<EmployeeRecordsScreenProps> = ({ lang, isO
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState('personal');
+  const isHR = !isOwner; // if not owner, must be HR admin
 
   const { data: allEmployees } = useQuery({
     queryKey: ['all_employees_unfiltered'],
@@ -235,7 +237,15 @@ const EmployeeRecordsScreen: React.FC<EmployeeRecordsScreenProps> = ({ lang, isO
         <h2 className="font-display text-lg font-bold text-foreground">
           {lang === 'hi' ? 'कर्मचारी रिकॉर्ड / Employee Records' : 'Employee Records / कर्मचारी रिकॉर्ड'}
         </h2>
-        <span className="text-xs text-muted-foreground">{filteredList.length}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{filteredList.length}</span>
+          {isHR && (
+            <button onClick={() => setShowAddForm(true)}
+              className="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+              <Plus className="w-3.5 h-3.5" /> {lang === 'hi' ? 'नया' : 'Add'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search */}
@@ -286,6 +296,8 @@ const EmployeeRecordsScreen: React.FC<EmployeeRecordsScreenProps> = ({ lang, isO
           </button>
         ))}
       </div>
+
+      {showAddForm && <AddEmployeeForm lang={lang} onClose={() => setShowAddForm(false)} />}
     </div>
   );
 };

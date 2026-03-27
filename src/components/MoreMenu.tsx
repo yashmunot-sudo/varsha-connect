@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Bell, Award, Settings, ChevronRight, FileText, Users, ClipboardList } from 'lucide-react';
+import { User, Bell, Award, Settings, ChevronRight, FileText, Users, ClipboardList, Wrench } from 'lucide-react';
 import ProfileScreen from './ProfileScreen';
 import NotificationsPanel from './NotificationsPanel';
 import SettingsScreen from './SettingsScreen';
@@ -9,6 +9,7 @@ import LeaderboardPanel from './LeaderboardPanel';
 import PayslipScreen from './PayslipScreen';
 import EmployeeRecordsScreen from './EmployeeRecordsScreen';
 import TaskDelegationScreen from './TaskDelegationScreen';
+import PartMasterScreen from './PartMasterScreen';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
 import { UserRole } from '@/lib/constants';
@@ -36,6 +37,7 @@ const MoreMenu: React.FC<MoreMenuProps> = ({ role, activeTab, onTabChange, badge
     { id: 'tasks', icon: ClipboardList, label_hi: 'कार्य', label_en: 'Tasks', sub_hi: 'कार्य प्रबंधन', sub_en: 'Task management', show: true },
     { id: 'leaderboard', icon: Award, label_hi: 'EoTM लीडरबोर्ड', label_en: 'Leaderboard', sub_hi: 'रैंकिंग देखें', sub_en: 'View rankings', show: true },
     { id: 'employee_records', icon: Users, label_hi: 'कर्मचारी रिकॉर्ड', label_en: 'Employee Records', sub_hi: 'कर्मचारी प्रबंधन', sub_en: 'Manage employees', show: isOwnerOrHR },
+    { id: 'part_master', icon: Wrench, label_hi: 'पार्ट मास्टर', label_en: 'Part Master', sub_hi: 'पार्ट प्रबंधन', sub_en: 'Manage parts', show: isOwnerOrHR || role === 'plant_head' },
     { id: 'settings', icon: Settings, label_hi: 'सेटिंग्स', label_en: 'Settings', sub_hi: 'भाषा, सहायता', sub_en: 'Language, help', show: true },
   ];
 
@@ -49,6 +51,7 @@ const MoreMenu: React.FC<MoreMenuProps> = ({ role, activeTab, onTabChange, badge
       case 'payslip': return <PayslipScreen lang={lang} employeeId={user?.employeeId} isHR={isHR} />;
       case 'tasks': return <TaskDelegationScreen lang={lang} />;
       case 'employee_records': return <EmployeeRecordsScreen lang={lang} isOwner={role === 'owner'} />;
+      case 'part_master': return <PartMasterScreen lang={lang} />;
       case 'settings': return <SettingsScreen />;
       default: return null;
     }
