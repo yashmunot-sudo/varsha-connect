@@ -472,8 +472,8 @@ const WorkerHome: React.FC = () => {
   );
 };
 
-// Leave and Advance forms are now imported from separate components
-  const [leaveType, setLeaveType] = useState('EL');
+
+
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [reason, setReason] = useState('');
