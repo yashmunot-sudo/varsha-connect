@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Bell, Award, Settings, ChevronRight, FileText, Users, ClipboardList } from 'lucide-react';
+import { User, Bell, Award, Settings, ChevronRight, FileText, Users, ClipboardList, Wrench } from 'lucide-react';
 import ProfileScreen from './ProfileScreen';
 import NotificationsPanel from './NotificationsPanel';
 import SettingsScreen from './SettingsScreen';
