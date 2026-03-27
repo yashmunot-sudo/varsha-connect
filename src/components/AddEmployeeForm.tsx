@@ -121,7 +121,7 @@ const AddEmployeeForm: React.FC<Props> = ({ lang, onClose }) => {
             <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'प्रकार / Type' : 'Salary Type'}</label>
             <select value={form.salary_type} onChange={e => update('salary_type', e.target.value)}
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground">
-              <option value="WORKER">Worker / कर्मचारी</option>
+              <option value="WORKER">Member / सदस्य</option>
               <option value="STAFF">Staff / स्टाफ</option>
             </select>
           </div>

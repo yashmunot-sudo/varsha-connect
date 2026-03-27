@@ -109,7 +109,7 @@ const HRAdminHome: React.FC = () => {
           </div>
           {[
             { cat: 'Staff (VFL1xxx)', count: employees?.filter(e => e.category === 'STAFF').length || 0 },
-            { cat: 'Workers (VFL4xxx)', count: employees?.filter(e => e.category === 'WORKER').length || 0 },
+            { cat: 'Members (VFL4xxx)', count: employees?.filter(e => e.category === 'WORKER').length || 0 },
             { cat: 'Consultants (CONxx)', count: employees?.filter(e => e.category === 'CONSULTANT').length || 0 },
           ].map((c, i) => (
             <div key={i} className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center justify-between">

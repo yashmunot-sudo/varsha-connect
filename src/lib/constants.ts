@@ -60,7 +60,7 @@ export const EMPLOYEE_CATEGORIES = {
 export type UserRole = 'worker' | 'supervisor' | 'manager' | 'hr_admin' | 'owner' | 'plant_head' | 'security_guard';
 
 export const USER_ROLES: Record<UserRole, { label_en: string; label_hi: string; icon: string }> = {
-  worker: { label_en: 'Worker', label_hi: 'कर्मचारी', icon: '👷' },
+  worker: { label_en: 'Member', label_hi: 'सदस्य', icon: '👷' },
   supervisor: { label_en: 'Supervisor', label_hi: 'सुपरवाइज़र', icon: '🦺' },
   manager: { label_en: 'Manager', label_hi: 'मैनेजर', icon: '💼' },
   hr_admin: { label_en: 'HR Admin', label_hi: 'HR एडमिन', icon: '📋' },

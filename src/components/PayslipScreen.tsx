@@ -459,7 +459,7 @@ const HRPayrollView: React.FC<{
       <div className="grid grid-cols-3 gap-2 text-center">
         <div className="bg-info/10 border border-info/30 rounded-xl p-2">
           <div className="font-display text-sm font-bold text-info">₹{(workerTotal / 100000).toFixed(1)}L</div>
-          <div className="text-[9px] text-muted-foreground">{lang === 'hi' ? 'कर्मचारी' : 'Workers'}</div>
+          <div className="text-[9px] text-muted-foreground">{lang === 'hi' ? 'सदस्य' : 'Members'}</div>
         </div>
         <div className="bg-primary/10 border border-primary/30 rounded-xl p-2">
           <div className="font-display text-sm font-bold text-primary">₹{(staffTotal / 100000).toFixed(1)}L</div>

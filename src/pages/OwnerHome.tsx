@@ -52,7 +52,7 @@ const OwnerHome: React.FC = () => {
             <div className="text-[10px] text-muted-foreground tracking-wider uppercase mb-4">{lang === 'hi' ? 'श्रेणी अनुसार विभाजन' : 'BY CATEGORY'}</div>
             {[
               { label: 'Staff', amount: `₹${(staffCost / 100000).toFixed(1)}L`, pct: totalPayroll > 0 ? Math.round((staffCost / totalPayroll) * 100) : 0, color: 'bg-info' },
-              { label: 'Workers', amount: `₹${(workerCost / 100000).toFixed(1)}L`, pct: totalPayroll > 0 ? Math.round((workerCost / totalPayroll) * 100) : 0, color: 'bg-success' },
+              { label: 'Members', amount: `₹${(workerCost / 100000).toFixed(1)}L`, pct: totalPayroll > 0 ? Math.round((workerCost / totalPayroll) * 100) : 0, color: 'bg-success' },
               { label: 'Consultants', amount: `₹${(consultCost / 100000).toFixed(1)}L`, pct: totalPayroll > 0 ? Math.round((consultCost / totalPayroll) * 100) : 0, color: 'bg-[hsl(var(--leave-purple))]' },
             ].map((c, i) => (
               <div key={i} className="mb-4 last:mb-0">
