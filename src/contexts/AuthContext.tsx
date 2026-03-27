@@ -46,16 +46,31 @@ const DEMO_PHONES: Record<UserRole, string> = {
 };
 
 async function fetchEmployeeByPhone(phone: string): Promise<AuthUser | null> {
-  // Try both with and without +91 prefix
+  // Strip +91 prefix if present to get raw number
   const raw = phone.replace(/^\+91/, '');
   const formatted = `+91${raw}`;
-  const { data, error } = await supabase
+  
+  // Try raw number first (most DB entries don't have +91)
+  let { data, error } = await supabase
     .from('employees')
     .select('*')
-    .or(`phone.eq.${formatted},phone.eq.${raw}`)
+    .eq('phone', raw)
     .eq('is_active', true)
     .limit(1)
     .maybeSingle();
+
+  // Fallback: try with +91 prefix
+  if (!data && !error) {
+    const result = await supabase
+      .from('employees')
+      .select('*')
+      .eq('phone', formatted)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+    data = result.data;
+    error = result.error;
+  }
 
   if (error || !data) return null;
 
