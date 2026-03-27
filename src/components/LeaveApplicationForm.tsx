@@ -121,6 +121,7 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
             <option value="EL">{lang === 'hi' ? 'अर्जित छुट्टी (EL) / Earned Leave' : 'Earned Leave (EL) / अर्जित छुट्टी'}</option>
             <option value="CL">{lang === 'hi' ? 'आकस्मिक छुट्टी (CL) / Casual Leave' : 'Casual Leave (CL) / आकस्मिक छुट्टी'}</option>
             <option value="SL">{lang === 'hi' ? 'बीमारी छुट्टी (SL) / Sick Leave' : 'Sick Leave (SL) / बीमारी छुट्टी'}</option>
+            <option value="CO">{lang === 'hi' ? 'कम्प-ऑफ (CO) / Comp-Off' : 'Comp-Off (CO) / कम्प-ऑफ'}</option>
           </select>
         </div>
 

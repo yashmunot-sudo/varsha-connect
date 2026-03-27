@@ -5,11 +5,13 @@ import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import { useTodayAttendanceAll, useAllEmployees, useAllScores } from '@/hooks/useEmployeeData';
 import { usePendingLeaveRequests, usePendingAdvanceRequests } from '@/hooks/useRequestData';
-import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2, Check, XIcon, Mail, ClipboardList, ShoppingCart } from 'lucide-react';
+import { Users, AlertTriangle, CheckCircle, Clock, TrendingUp, Building2, Check, XIcon, Mail, ClipboardList, ShoppingCart, Scale } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
 import MRMReviewTab from '@/components/MRMReviewTab';
 import EmailTasksTab from '@/components/EmailTasksTab';
 import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
+import ThreeWayMatchTab from '@/components/ThreeWayMatchTab';
+import RegularisationApprovals from '@/components/RegularisationApprovals';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -94,6 +96,16 @@ const PlantHeadHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'match') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <ThreeWayMatchTab />
+        <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
   if (activeTab === 'more') {
     return <MoreMenu role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
   }
@@ -135,6 +147,7 @@ const PlantHeadHome: React.FC = () => {
               </div>
             </div>
           ))}
+          <RegularisationApprovals />
           {totalPending === 0 && (
             <div className="text-center py-12">
               <Check className="w-8 h-8 text-success mx-auto mb-2" />
@@ -180,47 +193,44 @@ const PlantHeadHome: React.FC = () => {
       <div className="px-4 py-4 space-y-4">
         <div className="text-lg font-bold text-foreground">{greeting}, {user?.name?.split(' ')[0]}</div>
 
-        {/* KPI Summary */}
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-card rounded-xl border border-border p-3 text-center">
             <Users className="w-5 h-5 text-primary mx-auto mb-1" />
             <div className="text-xl font-bold text-foreground">{presentToday}/{activeCount}</div>
-            <div className="text-[10px] text-muted-foreground">{lang === 'hi' ? 'उपस्थित / Present' : 'Present'}</div>
+            <div className="text-[10px] text-muted-foreground">Present</div>
           </div>
           <div className="bg-card rounded-xl border border-border p-3 text-center">
             <TrendingUp className="w-5 h-5 text-success mx-auto mb-1" />
             <div className="text-xl font-bold text-foreground">{attendancePct}%</div>
-            <div className="text-[10px] text-muted-foreground">{lang === 'hi' ? 'हाज़िरी / Attendance' : 'Attendance'}</div>
+            <div className="text-[10px] text-muted-foreground">Attendance</div>
           </div>
           <div className="bg-card rounded-xl border border-border p-3 text-center">
             <CheckCircle className="w-5 h-5 text-info mx-auto mb-1" />
             <div className="text-xl font-bold text-foreground">{avgScore}</div>
-            <div className="text-[10px] text-muted-foreground">{lang === 'hi' ? 'औसत स्कोर / Avg Score' : 'Avg Score'}</div>
+            <div className="text-[10px] text-muted-foreground">Avg Score</div>
           </div>
         </div>
 
-        {/* Pending Approvals */}
         {pendingLeaves && pendingLeaves.length > 0 && (
           <div className="bg-card rounded-xl border border-border p-4">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="w-5 h-5 text-warning" />
-              <span className="font-bold text-foreground text-sm">
-                {lang === 'hi' ? 'लंबित स्वीकृति / Pending Approvals' : 'Pending Approvals'}
-              </span>
-              <span className="ml-auto bg-warning/15 text-warning text-xs font-bold px-2 py-0.5 rounded-full">
-                {pendingLeaves.length}
-              </span>
+              <span className="font-bold text-foreground text-sm">Pending Approvals</span>
+              <span className="ml-auto bg-warning/15 text-warning text-xs font-bold px-2 py-0.5 rounded-full">{pendingLeaves.length}</span>
             </div>
           </div>
         )}
 
-        {/* Department Performance */}
+        {/* 3-Way Match shortcut */}
+        <button onClick={() => setActiveTab('match')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
+          <Scale className="w-5 h-5 text-success" />
+          <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'तीन-तरफ़ा मिलान' : '3-Way Match'}</span>
+        </button>
+
         <div className="bg-card rounded-xl border border-border p-4">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="w-5 h-5 text-primary" />
-            <span className="font-bold text-foreground text-sm">
-              {lang === 'hi' ? 'विभाग प्रदर्शन / Department Performance' : 'Department Performance'}
-            </span>
+            <span className="font-bold text-foreground text-sm">Department Performance</span>
           </div>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {deptStats.slice(0, 10).map((d, i) => (
@@ -240,17 +250,12 @@ const PlantHeadHome: React.FC = () => {
           </div>
         </div>
 
-        {/* Escalation Alerts */}
         <div className="bg-card rounded-xl border border-border p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="w-5 h-5 text-destructive" />
-            <span className="font-bold text-foreground text-sm">
-              {lang === 'hi' ? 'एस्केलेशन अलर्ट / Escalation Alerts' : 'Escalation Alerts'}
-            </span>
+            <span className="font-bold text-foreground text-sm">Escalation Alerts</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {lang === 'hi' ? 'कोई लंबित एस्केलेशन नहीं / No pending escalations' : 'No pending escalations'}
-          </p>
+          <p className="text-xs text-muted-foreground">No pending escalations</p>
         </div>
       </div>
       <BottomNav role="plant_head" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />

@@ -543,10 +543,12 @@ const QuickAction: React.FC<{ icon: React.ElementType; label: string; sub: strin
 );
 
 const AttendanceCalendar: React.FC<{ lang: string; records: any[] }> = ({ lang, records }) => {
+  const [selectedDate, setSelectedDate] = React.useState<string | null>(null);
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
   const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const today = now.toISOString().split('T')[0];
 
   const statusColors: Record<string, string> = {
     P: 'bg-success text-primary-foreground', A: 'bg-danger text-primary-foreground', L: 'bg-[hsl(var(--leave-purple))] text-primary-foreground',
@@ -558,28 +560,53 @@ const AttendanceCalendar: React.FC<{ lang: string; records: any[] }> = ({ lang, 
     const day = i + 1;
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const record = records.find(r => r.attendance_date === dateStr);
-    return { day, status: record?.status || null };
+    return { day, dateStr, status: record?.status || null };
   });
 
+  const handleDayTap = (dateStr: string) => {
+    if (dateStr < today) {
+      setSelectedDate(dateStr);
+    }
+  };
+
   return (
-    <div className="bg-card rounded-xl border border-border card-shadow p-4">
-      <div className="grid grid-cols-7 gap-1.5">
-        {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
-          <div key={d} className="text-center text-[10px] text-muted-foreground py-1">{d}</div>
-        ))}
-        {Array.from({ length: offset }).map((_, i) => <div key={`off-${i}`} />)}
-        {days.map(({ day, status }) => (
-          <div
-            key={day}
-            className={`aspect-square rounded-md flex items-center justify-center text-xs font-medium ${
-              status ? (statusColors[status] || 'bg-muted text-muted-foreground') : 'bg-muted/30 text-foreground'
-            }`}
-          >
-            {day}
-          </div>
-        ))}
+    <>
+      <div className="bg-card rounded-xl border border-border card-shadow p-4">
+        <div className="grid grid-cols-7 gap-1.5">
+          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => (
+            <div key={d} className="text-center text-[10px] text-muted-foreground py-1">{d}</div>
+          ))}
+          {Array.from({ length: offset }).map((_, i) => <div key={`off-${i}`} />)}
+          {days.map(({ day, dateStr, status }) => (
+            <button
+              key={day}
+              onClick={() => handleDayTap(dateStr)}
+              className={`aspect-square rounded-md flex items-center justify-center text-xs font-medium ${
+                status ? (statusColors[status] || 'bg-muted text-muted-foreground') : 'bg-muted/30 text-foreground'
+              } ${dateStr < today ? 'cursor-pointer hover:ring-2 hover:ring-primary/50' : ''}`}
+            >
+              {day}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+      {selectedDate && (
+        <AttendanceRegularisationWrapper
+          date={selectedDate}
+          currentStatus={records.find(r => r.attendance_date === selectedDate)?.status}
+          onClose={() => setSelectedDate(null)}
+        />
+      )}
+    </>
+  );
+};
+
+const AttendanceRegularisationWrapper: React.FC<{ date: string; currentStatus?: string; onClose: () => void }> = (props) => {
+  const AttendanceRegularisation = React.lazy(() => import('@/components/AttendanceRegularisation'));
+  return (
+    <React.Suspense fallback={null}>
+      <AttendanceRegularisation {...props} />
+    </React.Suspense>
   );
 };
 

@@ -3,10 +3,12 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import { BarChart3, Users, FileCheck, Award, ChevronRight, TrendingUp, Check, XIcon, Briefcase, ClipboardList, ShoppingCart } from 'lucide-react';
+import { BarChart3, Users, FileCheck, Award, ChevronRight, TrendingUp, Check, XIcon, Briefcase, ClipboardList, ShoppingCart, Scale } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
 import MRMReviewTab from '@/components/MRMReviewTab';
 import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
+import ThreeWayMatchTab from '@/components/ThreeWayMatchTab';
+import RegularisationApprovals from '@/components/RegularisationApprovals';
 import { useAllEmployees, useTodayAttendanceAll, useAllScores } from '@/hooks/useEmployeeData';
 import { usePendingLeaveRequests, usePendingAdvanceRequests } from '@/hooks/useRequestData';
 import { supabase } from '@/integrations/supabase/client';
@@ -182,6 +184,9 @@ const ManagerHome: React.FC = () => {
             </div>
           )}
 
+          {/* Regularisation Approvals */}
+          <RegularisationApprovals />
+
           {totalPending === 0 && (
             <div className="text-center py-12">
               <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center mx-auto mb-3">
@@ -217,6 +222,16 @@ const ManagerHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'match') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <ThreeWayMatchTab />
+        <BottomNav role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />
+      </div>
+    );
+  }
+
   if (activeTab === 'more') {
     return <MoreMenu role="manager" activeTab={activeTab} onTabChange={setActiveTab} badges={{ approvals: totalPending }} />;
   }
@@ -233,7 +248,6 @@ const ManagerHome: React.FC = () => {
     <div className="min-h-screen bg-background pb-20">
       <TopBar />
       <div className="px-4 py-4 space-y-4">
-        {/* Greeting */}
         <div>
           <div className="text-xs text-primary font-semibold tracking-[0.15em] uppercase mb-1">
             {greeting()}, {user?.name?.split(' ')[0]}
@@ -243,7 +257,6 @@ const ManagerHome: React.FC = () => {
           </h1>
         </div>
 
-        {/* Overview card */}
         <div className="bg-gradient-to-br from-info/8 to-primary/5 rounded-2xl border border-info/15 p-5">
           <div className="text-[10px] text-info font-semibold tracking-[0.15em] uppercase mb-3">{lang === 'hi' ? 'आज का अवलोकन' : "TODAY'S OVERVIEW"}</div>
           <div className="grid grid-cols-2 gap-4">
@@ -273,6 +286,7 @@ const ManagerHome: React.FC = () => {
           {[
             { tab: 'attendance', icon: BarChart3, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'विभाग उपस्थिति' : 'Dept. Attendance' },
             { tab: 'approvals', icon: FileCheck, color: 'bg-warning/10', iconColor: 'text-warning', label: lang === 'hi' ? 'स्वीकृतियाँ' : 'Approvals', badge: totalPending },
+            { tab: 'match', icon: Scale, color: 'bg-success/10', iconColor: 'text-success', label: lang === 'hi' ? 'तीन-तरफ़ा मिलान' : '3-Way Match' },
             { tab: 'kpi', icon: TrendingUp, color: 'bg-primary/10', iconColor: 'text-primary', label: 'KPI' },
             { tab: 'mrm', icon: ClipboardList, color: 'bg-success/10', iconColor: 'text-success', label: lang === 'hi' ? 'समीक्षा / MRM' : 'MRM Review' },
             { tab: 'purchase', icon: ShoppingCart, color: 'bg-info/10', iconColor: 'text-info', label: lang === 'hi' ? 'खरीद' : 'Purchase' },

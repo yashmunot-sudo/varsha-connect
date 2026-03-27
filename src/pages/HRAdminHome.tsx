@@ -3,7 +3,7 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
-import { Calendar, Users, BarChart3, Send, ChevronRight, ChevronLeft, Download, Edit3, Banknote, Wrench, CheckCircle2 } from 'lucide-react';
+import { Calendar, Users, BarChart3, Send, ChevronRight, ChevronLeft, Download, Edit3, Banknote, Wrench, CheckCircle2, Shield, CalendarDays } from 'lucide-react';
 import { SHIFT_LIST } from '@/lib/constants';
 import { useAllEmployees, useTodayAttendanceAll, useWeekShifts, useSalaryMaster } from '@/hooks/useEmployeeData';
 import { useAllSalaryAdvances } from '@/hooks/useRequestData';
@@ -11,6 +11,15 @@ import { useAllMaintenanceObservations } from '@/hooks/useMaintenanceData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import ContractLabourSummary from '@/components/ContractLabourSummary';
+import MinWagesCompliance from '@/components/MinWagesCompliance';
+import PFChallanTab from '@/components/PFChallanTab';
+import ESICChallanTab from '@/components/ESICChallanTab';
+import LeaveEncashmentTab from '@/components/LeaveEncashmentTab';
+import HolidayMaster from '@/components/HolidayMaster';
+import ProbationTab from '@/components/ProbationTab';
+import SettingsScreen from '@/components/SettingsScreen';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const HRAdminHome: React.FC = () => {
   const { lang } = useLanguage();
@@ -98,31 +107,46 @@ const HRAdminHome: React.FC = () => {
         <TopBar />
         <div className="px-4 py-4 space-y-4">
           <h2 className="font-display text-lg font-bold text-foreground">
-            {lang === 'hi' ? 'पेरोल पूर्वावलोकन' : 'Payroll Preview'}
+            {lang === 'hi' ? 'पेरोल' : 'Payroll'}
           </h2>
-          <div className="bg-card rounded-xl border border-border card-shadow p-4">
-            <div className="text-[10px] text-primary font-semibold tracking-wider uppercase mb-2">
-              {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }).toUpperCase()}
-            </div>
-            <div className="font-display text-3xl font-extrabold text-foreground">₹{((totalEmp * 25000) / 100000).toFixed(1)}L</div>
-            <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'कुल अनुमानित पेरोल' : 'Total Estimated Payroll'}</div>
-          </div>
-          {[
-            { cat: 'Staff (VFL1xxx)', count: employees?.filter(e => e.category === 'STAFF').length || 0 },
-            { cat: 'Members (VFL4xxx)', count: employees?.filter(e => e.category === 'WORKER').length || 0 },
-            { cat: 'Consultants (CONxx)', count: employees?.filter(e => e.category === 'CONSULTANT').length || 0 },
-          ].map((c, i) => (
-            <div key={i} className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-semibold text-foreground">{c.cat}</div>
-                <div className="text-[10px] text-muted-foreground">{c.count} employees</div>
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="w-full grid grid-cols-4">
+              <TabsTrigger value="overview" className="text-xs">{lang === 'hi' ? 'अवलोकन' : 'Overview'}</TabsTrigger>
+              <TabsTrigger value="pf" className="text-xs">PF</TabsTrigger>
+              <TabsTrigger value="esic" className="text-xs">ESIC</TabsTrigger>
+              <TabsTrigger value="encash" className="text-xs">{lang === 'hi' ? 'इनकैश' : 'Encash'}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview">
+              <div className="space-y-4 mt-4">
+                <div className="bg-card rounded-xl border border-border card-shadow p-4">
+                  <div className="text-[10px] text-primary font-semibold tracking-wider uppercase mb-2">
+                    {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }).toUpperCase()}
+                  </div>
+                  <div className="font-display text-3xl font-extrabold text-foreground">₹{((totalEmp * 25000) / 100000).toFixed(1)}L</div>
+                  <div className="text-xs text-muted-foreground">{lang === 'hi' ? 'कुल अनुमानित पेरोल' : 'Total Estimated Payroll'}</div>
+                </div>
+                {[
+                  { cat: 'Staff (VFL1xxx)', count: employees?.filter(e => e.category === 'STAFF').length || 0 },
+                  { cat: 'Members (VFL4xxx)', count: employees?.filter(e => e.category === 'WORKER').length || 0 },
+                  { cat: 'Consultants (CONxx)', count: employees?.filter(e => e.category === 'CONSULTANT').length || 0 },
+                ].map((c, i) => (
+                  <div key={i} className="bg-card rounded-xl border border-border card-shadow p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-semibold text-foreground">{c.cat}</div>
+                      <div className="text-[10px] text-muted-foreground">{c.count} employees</div>
+                    </div>
+                  </div>
+                ))}
+                <button className="w-full py-3 rounded-xl border border-primary text-primary font-display font-bold text-sm touch-target flex items-center justify-center gap-2">
+                  <Download className="w-4 h-4" />
+                  {lang === 'hi' ? 'Google Sheets में निर्यात' : 'Export to Google Sheets'}
+                </button>
               </div>
-            </div>
-          ))}
-          <button className="w-full py-3 rounded-xl border border-primary text-primary font-display font-bold text-sm touch-target flex items-center justify-center gap-2">
-            <Download className="w-4 h-4" />
-            {lang === 'hi' ? 'Google Sheets में निर्यात' : 'Export to Google Sheets'}
-          </button>
+            </TabsContent>
+            <TabsContent value="pf"><PFChallanTab /></TabsContent>
+            <TabsContent value="esic"><ESICChallanTab /></TabsContent>
+            <TabsContent value="encash"><LeaveEncashmentTab /></TabsContent>
+          </Tabs>
         </div>
         <BottomNav role="hr_admin" activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
@@ -130,11 +154,41 @@ const HRAdminHome: React.FC = () => {
   }
 
   if (activeTab === 'settings') {
-    return <AdvanceEntrySection lang={lang} employees={employees} activeTab={activeTab} setActiveTab={setActiveTab} />;
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <div className="px-4 py-4 space-y-6">
+          <AdvanceEntrySection lang={lang} employees={employees} />
+          <HolidayMaster />
+          <SettingsScreen />
+        </div>
+        <BottomNav role="hr_admin" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
   }
 
   if (activeTab === 'maintenance') {
     return <MaintenanceOverview lang={lang} activeTab={activeTab} setActiveTab={setActiveTab} />;
+  }
+
+  if (activeTab === 'contract') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <ContractLabourSummary />
+        <BottomNav role="hr_admin" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'compliance') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <MinWagesCompliance />
+        <BottomNav role="hr_admin" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
   }
 
   // Home
@@ -177,12 +231,22 @@ const HRAdminHome: React.FC = () => {
           </button>
           <button onClick={() => setActiveTab('payroll')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
             <BarChart3 className="w-5 h-5 text-primary" />
-            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'पेरोल पूर्वावलोकन' : 'Payroll Preview'}</span>
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'पेरोल' : 'Payroll'}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button onClick={() => setActiveTab('contract')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
+            <Users className="w-5 h-5 text-warning" />
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'ठेका श्रम सारांश' : 'Contract Labour'}</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button onClick={() => setActiveTab('compliance')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
+            <Shield className="w-5 h-5 text-danger" />
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'न्यूनतम वेतन अनुपालन' : 'Min Wages Compliance'}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
           <button onClick={() => setActiveTab('settings')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
             <Banknote className="w-5 h-5 text-warning" />
-            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'अग्रिम प्रविष्टि' : 'Advance Entry'}</span>
+            <span className="text-sm font-semibold flex-1 text-left text-foreground">{lang === 'hi' ? 'अग्रिम / सेटिंग' : 'Advance / Settings'}</span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
           <button onClick={() => setActiveTab('maintenance')} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card card-shadow hover:bg-muted transition-colors">
@@ -198,7 +262,7 @@ const HRAdminHome: React.FC = () => {
 };
 
 // Advance Entry Section for HR
-const AdvanceEntrySection: React.FC<{ lang: string; employees: any[] | undefined; activeTab: string; setActiveTab: (t: string) => void }> = ({ lang, employees, activeTab, setActiveTab }) => {
+const AdvanceEntrySection: React.FC<{ lang: string; employees: any[] | undefined }> = ({ lang, employees }) => {
   const queryClient = useQueryClient();
   const { data: advances } = useAllSalaryAdvances();
   const [selectedEmp, setSelectedEmp] = useState('');
@@ -230,48 +294,44 @@ const AdvanceEntrySection: React.FC<{ lang: string; employees: any[] | undefined
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <TopBar />
-      <div className="px-4 py-4 space-y-4">
-        <h2 className="font-display text-lg font-bold text-foreground">{lang === 'hi' ? 'अग्रिम प्रविष्टि' : 'Advance Entry'}</h2>
-        <div className="bg-card rounded-xl border border-border card-shadow p-4 space-y-3">
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'कर्मचारी' : 'Employee'}</label>
-            <select value={selectedEmp} onChange={e => setSelectedEmp(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
-              <option value="">{lang === 'hi' ? 'चुनें...' : 'Select...'}</option>
-              {employees?.map(e => (
-                <option key={e.id} value={e.id}>{e.name} ({e.emp_code})</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'ओपनिंग बैलेंस (₹)' : 'Opening Balance (₹)'}</label>
-            <input type="number" value={openingBalance} onChange={e => setOpeningBalance(e.target.value)} placeholder="0" className="w-full rounded-xl border border-border bg-background px-4 py-3 text-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
-          </div>
-          <button onClick={handleSave} disabled={saving || !selectedEmp || !openingBalance} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target disabled:opacity-50">
-            {saving ? '...' : (lang === 'hi' ? 'सहेजें' : 'Save')}
-          </button>
-        </div>
-
-        {advances && advances.length > 0 && (
-          <div className="space-y-2">
-            <div className="text-xs text-primary font-semibold tracking-wider uppercase">{lang === 'hi' ? 'मौजूदा प्रविष्टियाँ' : 'Existing Entries'}</div>
-            {advances.map((adv: any) => (
-              <div key={adv.id} className="bg-card rounded-xl border border-border card-shadow p-3 flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium text-foreground">{adv.employees?.name}</div>
-                  <div className="text-[10px] text-muted-foreground">{adv.employees?.emp_code} · {adv.month}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold text-foreground">₹{adv.closing_balance}</div>
-                  <div className="text-[10px] text-muted-foreground">{lang === 'hi' ? 'बकाया' : 'balance'}</div>
-                </div>
-              </div>
+    <div className="space-y-4">
+      <h2 className="font-display text-lg font-bold text-foreground">{lang === 'hi' ? 'अग्रिम प्रविष्टि' : 'Advance Entry'}</h2>
+      <div className="bg-card rounded-xl border border-border card-shadow p-4 space-y-3">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'कर्मचारी' : 'Employee'}</label>
+          <select value={selectedEmp} onChange={e => setSelectedEmp(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+            <option value="">{lang === 'hi' ? 'चुनें...' : 'Select...'}</option>
+            {employees?.map(e => (
+              <option key={e.id} value={e.id}>{e.name} ({e.emp_code})</option>
             ))}
-          </div>
-        )}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'ओपनिंग बैलेंस (₹)' : 'Opening Balance (₹)'}</label>
+          <input type="number" value={openingBalance} onChange={e => setOpeningBalance(e.target.value)} placeholder="0" className="w-full rounded-xl border border-border bg-background px-4 py-3 text-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" />
+        </div>
+        <button onClick={handleSave} disabled={saving || !selectedEmp || !openingBalance} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target disabled:opacity-50">
+          {saving ? '...' : (lang === 'hi' ? 'सहेजें' : 'Save')}
+        </button>
       </div>
-      <BottomNav role="hr_admin" activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {advances && advances.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-xs text-primary font-semibold tracking-wider uppercase">{lang === 'hi' ? 'मौजूदा प्रविष्टियाँ' : 'Existing Entries'}</div>
+          {advances.map((adv: any) => (
+            <div key={adv.id} className="bg-card rounded-xl border border-border card-shadow p-3 flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-foreground">{adv.employees?.name}</div>
+                <div className="text-[10px] text-muted-foreground">{adv.employees?.emp_code} · {adv.month}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-bold text-foreground">₹{adv.closing_balance}</div>
+                <div className="text-[10px] text-muted-foreground">{lang === 'hi' ? 'बकाया' : 'balance'}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
