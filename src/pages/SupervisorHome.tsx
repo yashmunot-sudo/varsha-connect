@@ -99,6 +99,34 @@ const SupervisorHome: React.FC = () => {
 
   const lastConfirmRef = useRef<number>(0);
 
+  const checkFraudSpeed = async () => {
+    const now = Date.now();
+    confirmTimestamps.current.push(now);
+    // Keep only last 60 seconds
+    confirmTimestamps.current = confirmTimestamps.current.filter(t => now - t <= 60000);
+    if (confirmTimestamps.current.length > 8 && user?.employeeId) {
+      // Insert fraud flag
+      await supabase.from('fraud_flags').insert({
+        employee_id: user.employeeId,
+        flag_type: 'bulk_confirm_speed',
+        flag_detail: JSON.stringify({ count: confirmTimestamps.current.length, seconds_taken: 60 }),
+      });
+      // Notify plant heads
+      const { data: plantHeads } = await supabase.from('employees').select('id').eq('role', 'plant_head' as any);
+      if (plantHeads?.length) {
+        await supabase.from('notifications').insert(
+          plantHeads.map(ph => ({
+            employee_id: ph.id,
+            title: 'Fraud Alert: Bulk Confirmation',
+            body: `Supervisor confirmed ${confirmTimestamps.current.length} workers in 60 seconds`,
+            type: 'fraud_alert',
+          }))
+        );
+      }
+      confirmTimestamps.current = [];
+    }
+  };
+
   const confirmCheckpoint3 = async (employeeId: string) => {
     const now = Date.now();
     if (now - lastConfirmRef.current < 3000) {
@@ -106,6 +134,7 @@ const SupervisorHome: React.FC = () => {
       return;
     }
     lastConfirmRef.current = now;
+    await checkFraudSpeed();
 
     const todayDate = new Date().toISOString().split('T')[0];
     const cp = teamCheckpoints?.find(c => c.employee_id === employeeId);
