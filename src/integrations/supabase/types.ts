@@ -740,6 +740,7 @@ export type Database = {
           ctc_annual: number | null
           date_of_birth: string | null
           date_of_joining: string | null
+          deactivated_at: string | null
           department: string
           designation: string | null
           education: number | null
@@ -755,6 +756,7 @@ export type Database = {
           id: string
           ifsc: string | null
           is_active: boolean
+          is_ai_agent: boolean | null
           language: string | null
           medical: number | null
           missing_data: Json | null
@@ -793,6 +795,7 @@ export type Database = {
           ctc_annual?: number | null
           date_of_birth?: string | null
           date_of_joining?: string | null
+          deactivated_at?: string | null
           department?: string
           designation?: string | null
           education?: number | null
@@ -808,6 +811,7 @@ export type Database = {
           id?: string
           ifsc?: string | null
           is_active?: boolean
+          is_ai_agent?: boolean | null
           language?: string | null
           medical?: number | null
           missing_data?: Json | null
@@ -846,6 +850,7 @@ export type Database = {
           ctc_annual?: number | null
           date_of_birth?: string | null
           date_of_joining?: string | null
+          deactivated_at?: string | null
           department?: string
           designation?: string | null
           education?: number | null
@@ -861,6 +866,7 @@ export type Database = {
           id?: string
           ifsc?: string | null
           is_active?: boolean
+          is_ai_agent?: boolean | null
           language?: string | null
           medical?: number | null
           missing_data?: Json | null
