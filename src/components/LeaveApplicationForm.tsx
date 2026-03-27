@@ -168,6 +168,7 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
           </div>
         )}
 
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">{lang === 'hi' ? 'से / From' : 'From / से'}</label>
             <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
