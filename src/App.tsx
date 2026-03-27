@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/i18n/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ComponentDemo from "./pages/ComponentDemo.tsx";
 
 const queryClient = new QueryClient();
 
