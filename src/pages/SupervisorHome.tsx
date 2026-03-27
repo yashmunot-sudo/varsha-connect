@@ -18,6 +18,9 @@ const SupervisorHome: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [casualName, setCasualName] = useState('');
   const [casualId, setCasualId] = useState('');
+  const [reportProduction, setReportProduction] = useState('');
+  const [reportNotes, setReportNotes] = useState('');
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const { data: teamMembers } = useTeamAttendance(user?.department);
   const { data: casualWorkers } = useTodayCasualWorkers();
