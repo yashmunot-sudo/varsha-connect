@@ -488,7 +488,7 @@ const WorkerHome: React.FC = () => {
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
       </div>
-      <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
 
       {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
       {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
