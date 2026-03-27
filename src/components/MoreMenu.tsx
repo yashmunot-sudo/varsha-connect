@@ -10,6 +10,7 @@ import PayslipScreen from './PayslipScreen';
 import EmployeeRecordsScreen from './EmployeeRecordsScreen';
 import TaskDelegationScreen from './TaskDelegationScreen';
 import PartMasterScreen from './PartMasterScreen';
+import GRNScreen from './GRNScreen';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
 import { UserRole } from '@/lib/constants';
