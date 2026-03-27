@@ -237,7 +237,15 @@ const EmployeeRecordsScreen: React.FC<EmployeeRecordsScreenProps> = ({ lang, isO
         <h2 className="font-display text-lg font-bold text-foreground">
           {lang === 'hi' ? 'कर्मचारी रिकॉर्ड / Employee Records' : 'Employee Records / कर्मचारी रिकॉर्ड'}
         </h2>
-        <span className="text-xs text-muted-foreground">{filteredList.length}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{filteredList.length}</span>
+          {isHR && (
+            <button onClick={() => setShowAddForm(true)}
+              className="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+              <Plus className="w-3.5 h-3.5" /> {lang === 'hi' ? 'नया' : 'Add'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search */}
