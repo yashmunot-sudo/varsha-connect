@@ -1,0 +1,1 @@
+CREATE POLICY "Allow anon select for login" ON public.employees FOR SELECT TO anon USING (true);
