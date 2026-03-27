@@ -24,7 +24,7 @@ const SupervisorHome: React.FC = () => {
   const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const { data: teamMembers } = useTeamAttendance(user?.department);
-  const { data: casualWorkers } = useTodayCasualWorkers();
+  const confirmTimestamps = useRef<number[]>([]);
 
   const presentCount = teamMembers?.filter(m => m.status === 'P' || m.status === 'LC').length || 0;
   const absentCount = teamMembers?.filter(m => !m.status).length || 0;
