@@ -135,6 +135,16 @@ const SecurityGuardHome: React.FC = () => {
     );
   }
 
+  if (activeTab === 'contract') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <CasualWorkerCount departmentOverride="GATE" />
+        <BottomNav role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
+  }
+
   if (activeTab === 'more') {
     return <MoreMenu role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />;
   }

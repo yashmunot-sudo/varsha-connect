@@ -57,6 +57,7 @@ const roleNavItems: Record<UserRole, { id: string; icon: React.ElementType; labe
   security_guard: [
     { id: 'home', icon: Home, label_hi: 'होम', label_en: 'Home' },
     { id: 'vehicles', icon: ClipboardList, label_hi: 'वाहन', label_en: 'Vehicles' },
+    { id: 'contract', icon: Users, label_hi: 'ठेका', label_en: 'Contract' },
     { id: 'more', icon: Menu, label_hi: 'और', label_en: 'More' },
   ],
 };
