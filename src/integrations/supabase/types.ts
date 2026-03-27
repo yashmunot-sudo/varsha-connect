@@ -819,11 +819,42 @@ export type Database = {
           },
         ]
       }
+      employee_sync_log: {
+        Row: {
+          action: string | null
+          emp_code: string | null
+          error_message: string | null
+          id: string
+          sheet_row_number: number | null
+          status: string | null
+          synced_at: string | null
+        }
+        Insert: {
+          action?: string | null
+          emp_code?: string | null
+          error_message?: string | null
+          id?: string
+          sheet_row_number?: number | null
+          status?: string | null
+          synced_at?: string | null
+        }
+        Update: {
+          action?: string | null
+          emp_code?: string | null
+          error_message?: string | null
+          id?: string
+          sheet_row_number?: number | null
+          status?: string | null
+          synced_at?: string | null
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           aadhar: string | null
           account_no: string | null
           address: string | null
+          auth_email: string | null
           auth_user_id: string | null
           bank_name: string | null
           base_salary: number | null
@@ -882,6 +913,7 @@ export type Database = {
           aadhar?: string | null
           account_no?: string | null
           address?: string | null
+          auth_email?: string | null
           auth_user_id?: string | null
           bank_name?: string | null
           base_salary?: number | null
@@ -940,6 +972,7 @@ export type Database = {
           aadhar?: string | null
           account_no?: string | null
           address?: string | null
+          auth_email?: string | null
           auth_user_id?: string | null
           bank_name?: string | null
           base_salary?: number | null
