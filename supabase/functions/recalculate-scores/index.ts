@@ -1,106 +1,105 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    )
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-    const now = new Date()
-    const month = now.getMonth() + 1
-    const year = now.getFullYear()
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+  const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+  const endDate = new Date(year, month, 0).toISOString().split("T")[0];
 
-    // Get working days (exclude Sundays)
-    const daysInMonth = new Date(year, month, 0).getDate()
-    let workingDays = 0
-    for (let d = 1; d <= daysInMonth; d++) {
-      if (new Date(year, month - 1, d).getDay() !== 0) workingDays++
-    }
+  // Working days (exclude Sundays)
+  const daysInMonth = new Date(year, month, 0).getDate();
+  let workingDays = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    if (new Date(year, month - 1, d).getDay() !== 0) workingDays++;
+  }
 
-    // Get all active employees
-    const { data: employees } = await supabase.from('employees').select('id, role, department').eq('is_active', true)
-    if (!employees) throw new Error('No employees found')
+  const { data: employees } = await supabase.from("employees").select("id, role, department").eq("is_active", true);
 
-    const scores: Record<string, { attendance: number; performance: number; observation: number; composite: number }> = {}
+  if (!employees) return new Response(JSON.stringify({ error: "No employees" }), { status: 500 });
 
-    for (const emp of employees) {
-      // Attendance score
-      const { data: attendance } = await supabase.from('attendance').select('status, late_minutes')
-        .eq('employee_id', emp.id).gte('attendance_date', startDate).lte('attendance_date', endDate)
+  const scores: Record<string, any> = {};
 
-      const present = attendance?.filter(a => a.status === 'P').length || 0
-      const late = attendance?.filter(a => a.status === 'LC').length || 0
-      const ot = attendance?.filter(a => a.status === 'OT').length || 0
-      const effectivePresent = present + ot + (late * 0.5)
-      let attScore = workingDays > 0 ? (effectivePresent / workingDays) * 100 : 0
+  for (const emp of employees) {
+    const { data: att } = await supabase
+      .from("attendance")
+      .select("status, overtime_hours")
+      .eq("employee_id", emp.id)
+      .gte("attendance_date", startDate)
+      .lte("attendance_date", endDate);
 
-      // Perfect month bonus
-      if (present + ot >= workingDays && late === 0) attScore = Math.min(attScore + 50, 150)
+    const present = att?.filter((a) => a.status === "P").length || 0;
+    const late = att?.filter((a) => a.status === "LC").length || 0;
+    const ot = att?.filter((a) => a.status === "OT").length || 0;
+    const effective = present + ot + late * 0.5;
+    let attScore = workingDays > 0 ? (effective / workingDays) * 100 : 0;
+    if (present + ot >= workingDays && late === 0) attScore = Math.min(attScore + 50, 150);
 
-      // Observation score
-      const { data: observations } = await supabase.from('maintenance_observations').select('id')
-        .eq('employee_id', emp.id)
-        .gte('submitted_at', startDate)
-        .lte('submitted_at', endDate + 'T23:59:59')
-      const obsScore = Math.min((observations?.length || 0) * 15, 45)
+    const { count: obsCount } = await supabase
+      .from("maintenance_observations")
+      .select("*", { count: "exact", head: true })
+      .eq("employee_id", emp.id)
+      .not("acknowledged_at", "is", null)
+      .gte("submitted_at", startDate + "T00:00:00")
+      .lte("submitted_at", endDate + "T23:59:59");
+    const obsScore = Math.min((obsCount || 0) * 15, 45);
 
-      // Performance score (start at 60, +5 per completed checklist)
-      const { data: checklists } = await supabase.from('daily_checklist_log').select('id')
-        .eq('employee_id', emp.id)
-        .gte('date', startDate).lte('date', endDate)
-      const perfScore = 60 + (checklists?.length || 0) * 5
+    const { count: checklistCount } = await supabase
+      .from("daily_checklist_log")
+      .select("*", { count: "exact", head: true })
+      .eq("employee_id", emp.id)
+      .gte("date", startDate)
+      .lte("date", endDate);
+    const perfScore = Math.min(60 + (checklistCount || 0) * 5, 100);
 
-      // Composite based on role
-      let composite = 0
-      if (emp.role === 'worker') {
-        composite = (attScore * 0.40) + (perfScore * 0.40) + (obsScore * 0.20)
-      } else {
-        // Store raw for now, will adjust for supervisor/manager after
-        composite = (attScore * 0.40) + (perfScore * 0.40) + (obsScore * 0.20)
-      }
+    const composite = attScore * 0.4 + perfScore * 0.4 + obsScore * 0.2;
+    scores[emp.id] = {
+      attendance: Math.round(attScore),
+      performance: Math.round(perfScore),
+      observation: Math.round(obsScore),
+      composite: Math.round(composite),
+      role: emp.role,
+      department: emp.department,
+    };
+  }
 
-      scores[emp.id] = { attendance: Math.round(attScore), performance: Math.min(perfScore, 100), observation: obsScore, composite: Math.round(composite) }
-    }
-
-    // Supervisor composite = own * 0.6 + team avg * 0.4
-    const supervisors = employees.filter(e => e.role === 'supervisor')
-    for (const sup of supervisors) {
-      const teamWorkers = employees.filter(e => e.role === 'worker' && e.department === sup.department)
-      const teamAvg = teamWorkers.length > 0
+  // Supervisor: own * 0.60 + team avg * 0.40
+  for (const emp of employees.filter((e) => e.role === "supervisor")) {
+    const teamWorkers = employees.filter((e) => e.role === "worker" && e.department === emp.department);
+    const teamAvg =
+      teamWorkers.length > 0
         ? teamWorkers.reduce((s, w) => s + (scores[w.id]?.composite || 0), 0) / teamWorkers.length
-        : 0
-      const own = scores[sup.id]?.composite || 0
-      scores[sup.id].composite = Math.round(own * 0.60 + teamAvg * 0.40)
-    }
+        : 0;
+    scores[emp.id].composite = Math.round((scores[emp.id].composite || 0) * 0.6 + teamAvg * 0.4);
+  }
 
-    // Manager composite = own * 0.5 + sup avg * 0.3 + worker avg * 0.2
-    const managers = employees.filter(e => e.role === 'manager')
-    for (const mgr of managers) {
-      const deptSups = employees.filter(e => e.role === 'supervisor' && e.department === mgr.department)
-      const deptWorkers = employees.filter(e => e.role === 'worker' && e.department === mgr.department)
-      const supAvg = deptSups.length > 0 ? deptSups.reduce((s, e) => s + (scores[e.id]?.composite || 0), 0) / deptSups.length : 0
-      const wrkAvg = deptWorkers.length > 0 ? deptWorkers.reduce((s, e) => s + (scores[e.id]?.composite || 0), 0) / deptWorkers.length : 0
-      const own = scores[mgr.id]?.composite || 0
-      scores[mgr.id].composite = Math.round(own * 0.50 + supAvg * 0.30 + wrkAvg * 0.20)
-    }
+  // Manager: own * 0.50 + sup avg * 0.30 + worker avg * 0.20
+  for (const emp of employees.filter((e) => e.role === "manager")) {
+    const sups = employees.filter((e) => e.role === "supervisor" && e.department === emp.department);
+    const workers = employees.filter((e) => e.role === "worker" && e.department === emp.department);
+    const supAvg = sups.length > 0 ? sups.reduce((s, e) => s + (scores[e.id]?.composite || 0), 0) / sups.length : 0;
+    const wrkAvg =
+      workers.length > 0 ? workers.reduce((s, e) => s + (scores[e.id]?.composite || 0), 0) / workers.length : 0;
+    scores[emp.id].composite = Math.round((scores[emp.id].composite || 0) * 0.5 + supAvg * 0.3 + wrkAvg * 0.2);
+  }
 
-    // Rank all by composite desc
-    const ranked = Object.entries(scores).sort((a, b) => b[1].composite - a[1].composite)
+  // Rank and upsert
+  const ranked = Object.entries(scores).sort((a, b) => b[1].composite - a[1].composite);
 
-    // Upsert to monthly_scores
-    for (let i = 0; i < ranked.length; i++) {
-      const [empId, s] = ranked[i]
-      await supabase.from('monthly_scores').upsert({
+  for (let i = 0; i < ranked.length; i++) {
+    const [empId, s] = ranked[i];
+    await supabase.from("monthly_scores").upsert(
+      {
         employee_id: empId,
         month,
         year,
@@ -109,16 +108,13 @@ Deno.serve(async (req) => {
         observation_score: s.observation,
         composite_score: s.composite,
         eotm_rank: i + 1,
-      }, { onConflict: 'employee_id,month,year' })
-    }
-
-    return new Response(JSON.stringify({ success: true, processed: ranked.length }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "employee_id,month,year" },
+    );
   }
-})
+
+  return new Response(JSON.stringify({ success: true, processed: ranked.length, month, year }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+});
