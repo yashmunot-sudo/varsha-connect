@@ -18,6 +18,22 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Query available comp-off days
+  const { data: compOffDays } = useQuery({
+    queryKey: ['comp_off_available', employeeId],
+    enabled: !!employeeId && leaveType === 'CO',
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data } = await supabase.from('comp_off_balance')
+        .select('*')
+        .eq('employee_id', employeeId!)
+        .eq('is_used', false)
+        .eq('is_expired', false)
+        .gte('expiry_date', today);
+      return data || [];
+    },
+  });
+
   // Get employee info for department/shift
   const { data: myEmp } = useQuery({
     queryKey: ['my_emp_for_leave', employeeId],
@@ -66,6 +82,10 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
 
   const handleSubmit = async () => {
     if (!employeeId || !fromDate || !toDate) return;
+    if (leaveType === 'CO' && (!compOffDays || compOffDays.length === 0)) {
+      toast.error(lang === 'hi' ? 'कोई कम्प-ऑफ उपलब्ध नहीं' : 'No comp-off days available');
+      return;
+    }
     setSubmitting(true);
 
     // Determine approver - if low coverage, escalate to plant head
@@ -88,6 +108,15 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
     if (error) {
       toast.error(error.message);
     } else {
+      // If comp-off, mark days as used
+      if (leaveType === 'CO' && compOffDays) {
+        const daysNeeded = Math.ceil((new Date(toDate).getTime() - new Date(fromDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const toUse = compOffDays.slice(0, daysNeeded);
+        for (const co of toUse) {
+          await supabase.from('comp_off_balance').update({ is_used: true }).eq('id', co.id);
+        }
+      }
+
       // Notify approver
       if (approverId) {
         await supabase.from('notifications').insert({
@@ -99,6 +128,7 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
       }
       toast.success(lang === 'hi' ? 'आवेदन भेज दिया गया / Application Submitted' : 'Application Submitted / आवेदन भेज दिया गया');
       queryClient.invalidateQueries({ queryKey: ['pending_leave_requests'] });
+      queryClient.invalidateQueries({ queryKey: ['comp_off_available'] });
       onClose();
     }
     setSubmitting(false);
@@ -121,8 +151,22 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
             <option value="EL">{lang === 'hi' ? 'अर्जित छुट्टी (EL) / Earned Leave' : 'Earned Leave (EL) / अर्जित छुट्टी'}</option>
             <option value="CL">{lang === 'hi' ? 'आकस्मिक छुट्टी (CL) / Casual Leave' : 'Casual Leave (CL) / आकस्मिक छुट्टी'}</option>
             <option value="SL">{lang === 'hi' ? 'बीमारी छुट्टी (SL) / Sick Leave' : 'Sick Leave (SL) / बीमारी छुट्टी'}</option>
+            <option value="CO">{lang === 'hi' ? 'कम्प-ऑफ (CO) / Comp-Off' : 'Comp-Off (CO) / कम्प-ऑफ'}</option>
           </select>
         </div>
+
+        {leaveType === 'CO' && (
+          <div className="bg-info/10 border border-info/30 rounded-xl p-3">
+            <div className="text-xs font-bold text-info">
+              {lang === 'hi' ? 'उपलब्ध कम्प-ऑफ' : 'Available Comp-Off'}: {compOffDays?.length || 0} {lang === 'hi' ? 'दिन' : 'days'}
+            </div>
+            {compOffDays && compOffDays.length > 0 && (
+              <div className="text-[10px] text-muted-foreground mt-1">
+                {lang === 'hi' ? 'समाप्ति तिथि' : 'Expires'}: {compOffDays.map(c => c.expiry_date).join(', ')}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <div>
