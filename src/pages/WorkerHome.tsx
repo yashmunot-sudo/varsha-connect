@@ -7,6 +7,8 @@ import { MapPin, Clock, Camera, Star, Calendar, Award, FileText, Banknote, Chevr
 import DailyChecklist from '@/components/DailyChecklist';
 import MoreMenu from '@/components/MoreMenu';
 import SafetyTips from '@/components/SafetyTips';
+import LeaveApplicationForm from '@/components/LeaveApplicationForm';
+import AdvanceApplicationForm from '@/components/AdvanceApplicationForm';
 import { getCurrentPosition, isInsideGeofence } from '@/lib/geofence';
 import { useMyAttendance, useMyLeaveBalance, useMyScore, useMyShift } from '@/hooks/useEmployeeData';
 import { useMyAdvanceBalance } from '@/hooks/useRequestData';
