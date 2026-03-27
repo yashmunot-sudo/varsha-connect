@@ -54,6 +54,26 @@ const SupervisorHome: React.FC = () => {
     }
   };
 
+  const handleSubmitReport = async () => {
+    if (!user?.employeeId) return;
+    setReportSubmitting(true);
+    const { error } = await supabase.from('shift_reports' as any).insert({
+      supervisor_id: user.employeeId,
+      shift_date: new Date().toISOString().split('T')[0],
+      shift_type: 'general',
+      observations: reportProduction || null,
+      issues_reported: reportNotes || null,
+    });
+    setReportSubmitting(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === 'hi' ? '✓ रिपोर्ट जमा हो गई' : '✓ Report submitted');
+      setReportProduction('');
+      setReportNotes('');
+    }
+  };
+
   const greeting = () => {
     const h = new Date().getHours();
     if (h < 12) return lang === 'hi' ? 'सुप्रभात' : 'Good Morning';
