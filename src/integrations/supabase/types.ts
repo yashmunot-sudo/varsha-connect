@@ -2167,6 +2167,44 @@ export type Database = {
           },
         ]
       }
+      shift_reports: {
+        Row: {
+          id: string
+          issues_reported: string | null
+          observations: string | null
+          shift_date: string
+          shift_type: string
+          submitted_at: string
+          supervisor_id: string
+        }
+        Insert: {
+          id?: string
+          issues_reported?: string | null
+          observations?: string | null
+          shift_date?: string
+          shift_type?: string
+          submitted_at?: string
+          supervisor_id: string
+        }
+        Update: {
+          id?: string
+          issues_reported?: string | null
+          observations?: string | null
+          shift_date?: string
+          shift_type?: string
+          submitted_at?: string
+          supervisor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_reports_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shifts: {
         Row: {
           created_at: string
