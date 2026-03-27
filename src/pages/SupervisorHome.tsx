@@ -165,6 +165,7 @@ const SupervisorHome: React.FC = () => {
   };
 
   const markAbsent = async (employeeId: string) => {
+    await checkFraudSpeed();
     const todayDate = new Date().toISOString().split('T')[0];
     await supabase.from('attendance').upsert({
       employee_id: employeeId,
