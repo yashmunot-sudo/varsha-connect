@@ -472,8 +472,7 @@ const WorkerHome: React.FC = () => {
   );
 };
 
-// Leave Application Form Modal
-const LeaveApplicationForm: React.FC<{ lang: string; employeeId?: string; onClose: () => void }> = ({ lang, employeeId, onClose }) => {
+// Leave and Advance forms are now imported from separate components
   const [leaveType, setLeaveType] = useState('EL');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');

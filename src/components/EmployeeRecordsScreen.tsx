@@ -296,6 +296,8 @@ const EmployeeRecordsScreen: React.FC<EmployeeRecordsScreenProps> = ({ lang, isO
           </button>
         ))}
       </div>
+
+      {showAddForm && <AddEmployeeForm lang={lang} onClose={() => setShowAddForm(false)} />}
     </div>
   );
 };
