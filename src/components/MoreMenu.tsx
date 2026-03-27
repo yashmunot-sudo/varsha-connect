@@ -54,6 +54,7 @@ const MoreMenu: React.FC<MoreMenuProps> = ({ role, activeTab, onTabChange, badge
       case 'tasks': return <TaskDelegationScreen lang={lang} />;
       case 'employee_records': return <EmployeeRecordsScreen lang={lang} isOwner={role === 'owner'} />;
       case 'part_master': return <PartMasterScreen lang={lang} />;
+      case 'grn': return <GRNScreen lang={lang} />;
       case 'settings': return <SettingsScreen />;
       default: return null;
     }
