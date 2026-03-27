@@ -22,7 +22,7 @@ const AddEmployeeForm: React.FC<Props> = ({ lang, onClose }) => {
     'Administration', 'Purchase', 'Marketing', 'Design', 'Accounts', 'HR', 'IT', 'Production'];
 
   const roles = [
-    { value: 'worker', label: 'Worker / कर्मचारी' },
+    { value: 'worker', label: 'Member / सदस्य' },
     { value: 'supervisor', label: 'Supervisor / सुपरवाइज़र' },
     { value: 'manager', label: 'Manager / मैनेजर' },
     { value: 'hr_admin', label: 'HR Admin' },
