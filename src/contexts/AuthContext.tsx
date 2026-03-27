@@ -116,10 +116,13 @@ async function fetchEmployeeByAuthId(authUserId: string): Promise<AuthUser | nul
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const isDemoLoginRef = React.useRef(false);
 
   useEffect(() => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Skip SIGNED_OUT events during demo login to avoid clearing the demo user
+      if (isDemoLoginRef.current) return;
       if (session?.user) {
         const emp = await fetchEmployeeByAuthId(session.user.id);
         if (emp) {
@@ -199,6 +202,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setDemoUser = async (role: UserRole) => {
+    isDemoLoginRef.current = true;
     setIsLoading(true);
     setUser(null);
     localStorage.removeItem('vfl-user');
@@ -211,6 +215,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('vfl-user', JSON.stringify(emp));
     }
     setIsLoading(false);
+    isDemoLoginRef.current = false;
   };
 
   return (
