@@ -18,6 +18,9 @@ const SupervisorHome: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [casualName, setCasualName] = useState('');
   const [casualId, setCasualId] = useState('');
+  const [reportProduction, setReportProduction] = useState('');
+  const [reportNotes, setReportNotes] = useState('');
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const { data: teamMembers } = useTeamAttendance(user?.department);
   const { data: casualWorkers } = useTodayCasualWorkers();
@@ -48,6 +51,26 @@ const SupervisorHome: React.FC = () => {
       setCasualName('');
       setCasualId('');
       queryClient.invalidateQueries({ queryKey: ['casual_workers_today'] });
+    }
+  };
+
+  const handleSubmitReport = async () => {
+    if (!user?.employeeId) return;
+    setReportSubmitting(true);
+    const { error } = await supabase.from('shift_reports' as any).insert({
+      supervisor_id: user.employeeId,
+      shift_date: new Date().toISOString().split('T')[0],
+      shift_type: 'general',
+      observations: reportProduction || null,
+      issues_reported: reportNotes || null,
+    });
+    setReportSubmitting(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(lang === 'hi' ? '✓ रिपोर्ट जमा हो गई' : '✓ Report submitted');
+      setReportProduction('');
+      setReportNotes('');
     }
   };
 
@@ -270,13 +293,13 @@ const SupervisorHome: React.FC = () => {
           <div className="bg-card rounded-2xl border border-border card-shadow p-4 space-y-4">
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block font-medium">{lang === 'hi' ? 'उत्पादन संख्या' : 'Production Numbers'}</label>
-              <input type="number" placeholder="0" className="w-full rounded-xl border border-border bg-background px-4 py-3 text-lg text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+              <input type="number" placeholder="0" value={reportProduction} onChange={e => setReportProduction(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-lg text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1.5 block font-medium">{lang === 'hi' ? 'घटनाएं / नोट्स' : 'Incidents / Notes'}</label>
-              <textarea rows={3} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+              <textarea rows={3} value={reportNotes} onChange={e => setReportNotes(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
             </div>
-            <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target shadow-md shadow-primary/20 active:scale-[0.98] transition-all">
+            <button onClick={handleSubmitReport} disabled={reportSubmitting} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target shadow-md shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50">
               {lang === 'hi' ? 'रिपोर्ट जमा करें' : 'Submit Report'}
             </button>
           </div>
