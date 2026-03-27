@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import MoreMenu from '@/components/MoreMenu';
+import CasualWorkerCount from '@/components/CasualWorkerCount';
 import { Shield, Truck, UserCheck, Clock, Plus, Search, ChevronRight } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
