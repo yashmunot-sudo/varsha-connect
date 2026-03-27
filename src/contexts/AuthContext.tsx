@@ -206,7 +206,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setUser(null);
     localStorage.removeItem('vfl-user');
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     await new Promise(resolve => setTimeout(resolve, 500));
     const phone = DEMO_PHONES[role];
     const emp = await fetchEmployeeByPhone(phone);
