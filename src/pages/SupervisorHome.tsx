@@ -6,7 +6,8 @@ import BottomNav from '@/components/BottomNav';
 import { Users, Plus, FileText, ChevronRight, UserCheck, Clock, ShoppingCart, XCircle } from 'lucide-react';
 import MoreMenu from '@/components/MoreMenu';
 import PurchaseRequisitionTab from '@/components/PurchaseRequisitionTab';
-import { useTeamAttendance, useTodayCasualWorkers } from '@/hooks/useEmployeeData';
+import CasualWorkerCount from '@/components/CasualWorkerCount';
+import { useTeamAttendance } from '@/hooks/useEmployeeData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
@@ -23,7 +24,7 @@ const SupervisorHome: React.FC = () => {
   const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const { data: teamMembers } = useTeamAttendance(user?.department);
-  const { data: casualWorkers } = useTodayCasualWorkers();
+  const confirmTimestamps = useRef<number[]>([]);
 
   const presentCount = teamMembers?.filter(m => m.status === 'P' || m.status === 'LC').length || 0;
   const absentCount = teamMembers?.filter(m => !m.status).length || 0;
@@ -98,6 +99,34 @@ const SupervisorHome: React.FC = () => {
 
   const lastConfirmRef = useRef<number>(0);
 
+  const checkFraudSpeed = async () => {
+    const now = Date.now();
+    confirmTimestamps.current.push(now);
+    // Keep only last 60 seconds
+    confirmTimestamps.current = confirmTimestamps.current.filter(t => now - t <= 60000);
+    if (confirmTimestamps.current.length > 8 && user?.employeeId) {
+      // Insert fraud flag
+      await supabase.from('fraud_flags').insert({
+        employee_id: user.employeeId,
+        flag_type: 'bulk_confirm_speed',
+        flag_detail: JSON.stringify({ count: confirmTimestamps.current.length, seconds_taken: 60 }),
+      });
+      // Notify plant heads
+      const { data: plantHeads } = await supabase.from('employees').select('id').eq('role', 'plant_head' as any);
+      if (plantHeads?.length) {
+        await supabase.from('notifications').insert(
+          plantHeads.map(ph => ({
+            employee_id: ph.id,
+            title: 'Fraud Alert: Bulk Confirmation',
+            body: `Supervisor confirmed ${confirmTimestamps.current.length} workers in 60 seconds`,
+            type: 'fraud_alert',
+          }))
+        );
+      }
+      confirmTimestamps.current = [];
+    }
+  };
+
   const confirmCheckpoint3 = async (employeeId: string) => {
     const now = Date.now();
     if (now - lastConfirmRef.current < 3000) {
@@ -105,6 +134,7 @@ const SupervisorHome: React.FC = () => {
       return;
     }
     lastConfirmRef.current = now;
+    await checkFraudSpeed();
 
     const todayDate = new Date().toISOString().split('T')[0];
     const cp = teamCheckpoints?.find(c => c.employee_id === employeeId);
@@ -135,6 +165,7 @@ const SupervisorHome: React.FC = () => {
   };
 
   const markAbsent = async (employeeId: string) => {
+    await checkFraudSpeed();
     const todayDate = new Date().toISOString().split('T')[0];
     await supabase.from('attendance').upsert({
       employee_id: employeeId,
@@ -231,48 +262,7 @@ const SupervisorHome: React.FC = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <TopBar />
-        <div className="px-4 py-4 space-y-4">
-          <h2 className="font-display text-lg font-bold text-foreground">
-            {lang === 'hi' ? 'कैज़ुअल वर्कर लॉग' : 'Log Casual Workers'}
-          </h2>
-          <div className="bg-card rounded-2xl border border-border card-shadow p-4 space-y-3">
-            <input
-              type="text"
-              value={casualName}
-              onChange={e => setCasualName(e.target.value)}
-              placeholder={lang === 'hi' ? 'नाम' : 'Name'}
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-            />
-            <input
-              type="text"
-              value={casualId}
-              onChange={e => setCasualId(e.target.value)}
-              placeholder={lang === 'hi' ? 'ID नंबर (वैकल्पिक)' : 'ID Number (optional)'}
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-            />
-            <button onClick={handleAddCasual} disabled={!casualName.trim()} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm touch-target disabled:opacity-50 shadow-md shadow-primary/20 active:scale-[0.98] transition-all">
-              <Plus className="w-4 h-4 inline mr-2" />
-              {lang === 'hi' ? 'जोड़ें' : 'Add Worker'}
-            </button>
-          </div>
-
-          {casualWorkers && casualWorkers.length > 0 && (
-            <>
-              <div className="text-[10px] text-primary font-semibold tracking-[0.15em] uppercase">
-                {lang === 'hi' ? 'आज लॉग किए गए' : 'Logged Today'}: {casualWorkers.length}
-              </div>
-              {casualWorkers.map((cw: any) => (
-                <div key={cw.id} className="bg-card rounded-2xl border border-border card-shadow p-3.5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-                    <UserCheck className="w-4 h-4 text-success" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground flex-1">{cw.name}</span>
-                  <span className="text-[10px] text-muted-foreground font-mono">{cw.id_number || '-'}</span>
-                </div>
-              ))}
-            </>
-          )}
-        </div>
+        <CasualWorkerCount />
         <BottomNav role="supervisor" activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     );

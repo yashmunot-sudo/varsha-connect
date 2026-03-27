@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import TopBar from '@/components/TopBar';
 import BottomNav from '@/components/BottomNav';
 import MoreMenu from '@/components/MoreMenu';
+import CasualWorkerCount from '@/components/CasualWorkerCount';
 import { Shield, Truck, UserCheck, Clock, Plus, Search, ChevronRight } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -129,6 +130,16 @@ const SecurityGuardHome: React.FC = () => {
             </div>
           )}
         </div>
+        <BottomNav role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
+    );
+  }
+
+  if (activeTab === 'contract') {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar />
+        <CasualWorkerCount departmentOverride="GATE" />
         <BottomNav role="security_guard" activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
     );

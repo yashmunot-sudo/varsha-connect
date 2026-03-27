@@ -231,6 +231,63 @@ export type Database = {
           },
         ]
       }
+      attendance_regularisation: {
+        Row: {
+          attendance_date: string
+          created_at: string | null
+          employee_id: string
+          id: string
+          reason: string | null
+          rejection_reason: string | null
+          requested_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          shift_type: string | null
+          status: string | null
+        }
+        Insert: {
+          attendance_date: string
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          requested_status: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shift_type?: string | null
+          status?: string | null
+        }
+        Update: {
+          attendance_date?: string
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          reason?: string | null
+          rejection_reason?: string | null
+          requested_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shift_type?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_regularisation_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_regularisation_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_warnings: {
         Row: {
           acknowledged_at: string | null
@@ -330,6 +387,44 @@ export type Database = {
           {
             foreignKeyName: "casual_workers_logged_by_fkey"
             columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comp_off_balance: {
+        Row: {
+          created_at: string | null
+          earned_date: string
+          employee_id: string
+          expiry_date: string
+          id: string
+          is_expired: boolean | null
+          is_used: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          earned_date: string
+          employee_id: string
+          expiry_date: string
+          id?: string
+          is_expired?: boolean | null
+          is_used?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          earned_date?: string
+          employee_id?: string
+          expiry_date?: string
+          id?: string
+          is_expired?: boolean | null
+          is_used?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_off_balance_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
@@ -735,6 +830,7 @@ export type Database = {
           blood_group: string | null
           category: Database["public"]["Enums"]["employee_category"]
           communication: number | null
+          confirmation_date: string | null
           conveyance: number | null
           created_at: string
           ctc_annual: number | null
@@ -767,12 +863,14 @@ export type Database = {
           personal_email: string | null
           pf_deduction: number | null
           phone: string
+          probation_status: string | null
           production_allow: number | null
           prof_development: number | null
           reporting_manager_emp_code: string | null
           reporting_manager_name: string | null
           role: Database["public"]["Enums"]["app_role"]
           salary_type: string | null
+          skill_level: string | null
           special_allowance: number | null
           uan: string | null
           uniform: number | null
@@ -790,6 +888,7 @@ export type Database = {
           blood_group?: string | null
           category?: Database["public"]["Enums"]["employee_category"]
           communication?: number | null
+          confirmation_date?: string | null
           conveyance?: number | null
           created_at?: string
           ctc_annual?: number | null
@@ -822,12 +921,14 @@ export type Database = {
           personal_email?: string | null
           pf_deduction?: number | null
           phone: string
+          probation_status?: string | null
           production_allow?: number | null
           prof_development?: number | null
           reporting_manager_emp_code?: string | null
           reporting_manager_name?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           salary_type?: string | null
+          skill_level?: string | null
           special_allowance?: number | null
           uan?: string | null
           uniform?: number | null
@@ -845,6 +946,7 @@ export type Database = {
           blood_group?: string | null
           category?: Database["public"]["Enums"]["employee_category"]
           communication?: number | null
+          confirmation_date?: string | null
           conveyance?: number | null
           created_at?: string
           ctc_annual?: number | null
@@ -877,12 +979,14 @@ export type Database = {
           personal_email?: string | null
           pf_deduction?: number | null
           phone?: string
+          probation_status?: string | null
           production_allow?: number | null
           prof_development?: number | null
           reporting_manager_emp_code?: string | null
           reporting_manager_name?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           salary_type?: string | null
+          skill_level?: string | null
           special_allowance?: number | null
           uan?: string | null
           uniform?: number | null
@@ -1001,6 +1105,7 @@ export type Database = {
           grn_number: string
           id: string
           material_description: string
+          payment_status: string | null
           po_number: string | null
           qc_approved_at: string | null
           qc_approved_by: string | null
@@ -1023,6 +1128,7 @@ export type Database = {
           grn_number: string
           id?: string
           material_description: string
+          payment_status?: string | null
           po_number?: string | null
           qc_approved_at?: string | null
           qc_approved_by?: string | null
@@ -1045,6 +1151,7 @@ export type Database = {
           grn_number?: string
           id?: string
           material_description?: string
+          payment_status?: string | null
           po_number?: string | null
           qc_approved_at?: string | null
           qc_approved_by?: string | null
@@ -1255,6 +1362,7 @@ export type Database = {
           earned_leave: number
           el_used: number
           employee_id: string
+          encashed_days: number | null
           id: string
           sick_leave: number
           sl_used: number
@@ -1267,6 +1375,7 @@ export type Database = {
           earned_leave?: number
           el_used?: number
           employee_id: string
+          encashed_days?: number | null
           id?: string
           sick_leave?: number
           sl_used?: number
@@ -1279,6 +1388,7 @@ export type Database = {
           earned_leave?: number
           el_used?: number
           employee_id?: string
+          encashed_days?: number | null
           id?: string
           sick_leave?: number
           sl_used?: number
@@ -1824,6 +1934,47 @@ export type Database = {
           },
         ]
       }
+      public_holidays: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          holiday_date: string
+          holiday_name: string
+          holiday_name_hi: string | null
+          id: string
+          is_national: boolean | null
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          holiday_date: string
+          holiday_name: string
+          holiday_name_hi?: string | null
+          id?: string
+          is_national?: boolean | null
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          holiday_date?: string
+          holiday_name?: string
+          holiday_name_hi?: string | null
+          id?: string
+          is_national?: boolean | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_holidays_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_orders: {
         Row: {
           created_at: string | null
@@ -2328,10 +2479,12 @@ export type Database = {
           exception_escalated_to: string | null
           exception_reason: string | null
           grn_id: string | null
+          grn_qty: number | null
           grn_quantity: number | null
           id: string
           invoice_id: string | null
           invoice_price: number | null
+          invoice_qty: number | null
           invoice_quantity: number | null
           matched_at: string | null
           matched_by: string | null
@@ -2350,10 +2503,12 @@ export type Database = {
           exception_escalated_to?: string | null
           exception_reason?: string | null
           grn_id?: string | null
+          grn_qty?: number | null
           grn_quantity?: number | null
           id?: string
           invoice_id?: string | null
           invoice_price?: number | null
+          invoice_qty?: number | null
           invoice_quantity?: number | null
           matched_at?: string | null
           matched_by?: string | null
@@ -2372,10 +2527,12 @@ export type Database = {
           exception_escalated_to?: string | null
           exception_reason?: string | null
           grn_id?: string | null
+          grn_qty?: number | null
           grn_quantity?: number | null
           id?: string
           invoice_id?: string | null
           invoice_price?: number | null
+          invoice_qty?: number | null
           invoice_quantity?: number | null
           matched_at?: string | null
           matched_by?: string | null
