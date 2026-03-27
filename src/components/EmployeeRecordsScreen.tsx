@@ -19,6 +19,7 @@ const EmployeeRecordsScreen: React.FC<EmployeeRecordsScreenProps> = ({ lang, isO
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState('personal');
+  const isHR = !isOwner; // if not owner, must be HR admin
 
   const { data: allEmployees } = useQuery({
     queryKey: ['all_employees_unfiltered'],
