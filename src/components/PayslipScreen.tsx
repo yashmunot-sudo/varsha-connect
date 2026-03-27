@@ -239,20 +239,22 @@ const PayslipScreen: React.FC<PayslipScreenProps> = ({ lang, employeeId, isHR })
         <table className="w-full text-[11px] border-collapse">
           <tbody>
             <tr>
-              <td className="border border-black/30 px-2 py-1 font-semibold w-[15%]">Name</td>
-              <td className="border border-black/30 px-2 py-1 w-[35%]">{emp?.name || '-'}</td>
-              <td className="border border-black/30 px-2 py-1 font-semibold w-[15%]">Emp ID</td>
-              <td className="border border-black/30 px-2 py-1 w-[35%]">{emp?.emp_code || '-'}</td>
+              <td className="border border-black/30 px-2 py-1 font-semibold">Name</td>
+              <td className="border border-black/30 px-2 py-1" colSpan={2}>{emp?.name || '-'}</td>
+              <td className="border border-black/30 px-2 py-1 font-semibold">Emp ID</td>
+              <td className="border border-black/30 px-2 py-1" colSpan={2}>{emp?.emp_code || '-'}</td>
             </tr>
             <tr>
               <td className="border border-black/30 px-2 py-1 font-semibold">Dept.</td>
-              <td className="border border-black/30 px-2 py-1">{emp?.department || '-'}</td>
+              <td className="border border-black/30 px-2 py-1" colSpan={2}>{emp?.department || '-'}</td>
               <td className="border border-black/30 px-2 py-1 font-semibold">Designation</td>
-              <td className="border border-black/30 px-2 py-1">{emp?.designation || '-'}</td>
+              <td className="border border-black/30 px-2 py-1" colSpan={2}>{emp?.designation || '-'}</td>
             </tr>
             <tr>
               <td className="border border-black/30 px-2 py-1 font-semibold">Present</td>
               <td className="border border-black/30 px-2 py-1">{presentDays}</td>
+              <td className="border border-black/30 px-2 py-1 font-semibold">PH</td>
+              <td className="border border-black/30 px-2 py-1"></td>
               <td className="border border-black/30 px-2 py-1 font-semibold">OT Hrs</td>
               <td className="border border-black/30 px-2 py-1">{otHours}</td>
             </tr>
@@ -261,12 +263,13 @@ const PayslipScreen: React.FC<PayslipScreenProps> = ({ lang, employeeId, isHR })
               <td className="border border-black/30 px-2 py-1">{elBal}</td>
               <td className="border border-black/30 px-2 py-1 font-semibold">CL</td>
               <td className="border border-black/30 px-2 py-1">{clBal}</td>
-            </tr>
-            <tr>
               <td className="border border-black/30 px-2 py-1 font-semibold">SL</td>
               <td className="border border-black/30 px-2 py-1">{slBal}</td>
+            </tr>
+            <tr>
               <td className="border border-black/30 px-2 py-1 font-semibold">Days Payable</td>
               <td className="border border-black/30 px-2 py-1">{daysPayable}</td>
+              <td className="border border-black/30 px-2 py-1" colSpan={4}></td>
             </tr>
           </tbody>
         </table>
