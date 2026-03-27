@@ -172,7 +172,7 @@ const WorkerHome: React.FC = () => {
             <StatCard label={lang === 'hi' ? 'देर से' : 'Late'} value={String(lateCount)} color="text-warning" bg="bg-warning/10" />
           </div>
         </div>
-        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
       </div>
     );
   }
