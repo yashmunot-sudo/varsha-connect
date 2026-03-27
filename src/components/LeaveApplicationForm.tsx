@@ -18,6 +18,22 @@ const LeaveApplicationForm: React.FC<Props> = ({ lang, employeeId, onClose }) =>
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Query available comp-off days
+  const { data: compOffDays } = useQuery({
+    queryKey: ['comp_off_available', employeeId],
+    enabled: !!employeeId && leaveType === 'CO',
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data } = await supabase.from('comp_off_balance')
+        .select('*')
+        .eq('employee_id', employeeId!)
+        .eq('is_used', false)
+        .eq('is_expired', false)
+        .gte('expiry_date', today);
+      return data || [];
+    },
+  });
+
   // Get employee info for department/shift
   const { data: myEmp } = useQuery({
     queryKey: ['my_emp_for_leave', employeeId],
