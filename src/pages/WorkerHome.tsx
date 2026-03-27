@@ -256,7 +256,7 @@ const WorkerHome: React.FC = () => {
             </button>
           </div>
         </div>
-        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNav role="worker" activeTab={activeTab} onTabChange={setActiveTab} department={user?.department} />
 
         {showLeaveForm && <LeaveApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowLeaveForm(false)} />}
         {showAdvanceForm && <AdvanceApplicationForm lang={lang} employeeId={user?.employeeId} onClose={() => setShowAdvanceForm(false)} />}
